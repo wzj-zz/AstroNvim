@@ -1,7 +1,3 @@
-if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
--- Customize Treesitter
-
 ---@type LazySpec
 return {
   "nvim-treesitter/nvim-treesitter",
@@ -9,7 +5,105 @@ return {
     ensure_installed = {
       "lua",
       "vim",
-      -- add more arguments for adding more treesitter parsers
+    },
+    textobjects = {
+      select = {
+        enable = true,
+        lookahead = true,
+        keymaps = {
+          ["ak"] = { query = "@block.outer", desc = "around block" },
+          ["ik"] = { query = "@block.inner", desc = "inside block" },
+          ["ac"] = { query = "@class.outer", desc = "around class" },
+          ["ic"] = { query = "@class.inner", desc = "inside class" },
+          ["a?"] = { query = "@conditional.outer", desc = "around conditional" },
+          ["i?"] = { query = "@conditional.inner", desc = "inside conditional" },
+          ["af"] = { query = "@function.outer", desc = "around function " },
+          ["if"] = { query = "@function.inner", desc = "inside function " },
+          ["ao"] = { query = "@loop.outer", desc = "around loop" },
+          ["io"] = { query = "@loop.inner", desc = "inside loop" },
+          ["aa"] = { query = "@parameter.outer", desc = "around argument" },
+          ["ia"] = { query = "@parameter.inner", desc = "inside argument" },
+        },
+      },
+      move = {
+        enable = true,
+        set_jumps = true,
+        goto_next_start = {
+          ["]k"] = { query = "@block.outer", desc = "Next block start" },
+          ["]f"] = { query = "@function.outer", desc = "Next function start" },
+          ["]a"] = { query = "@parameter.inner", desc = "Next argument start" },
+          ["]z"] = { query = "@class.outer", desc = "Next class start" },
+          ["]]"] = { query = "@comment.outer", desc = "Next comment start" },
+          ["]o"] = { query = "@loop.outer", desc = "Next loop start" },
+          ["]?"] = { query = "@conditional.outer", desc = "Next conditional start" },
+          ["]s"] = { query = "@call.outer", desc = "Next callsite start" },
+          ["]r"] = { query = "@return.outer", desc = "Next return start" },
+          ["]n"] = { query = "@assignment.rhs", desc = "Next assignment rhs" },
+        },
+        goto_next_end = {
+          ["]K"] = { query = "@block.outer", desc = "Next block end" },
+          ["]F"] = { query = "@function.outer", desc = "Next function end" },
+          ["]A"] = { query = "@parameter.inner", desc = "Next argument end" },
+          ["]Z"] = { query = "@class.outer", desc = "Next class end" },
+        },
+        goto_previous_start = {
+          ["[k"] = { query = "@block.outer", desc = "Previous block start" },
+          ["[f"] = { query = "@function.outer", desc = "Previous function start" },
+          ["[a"] = { query = "@parameter.inner", desc = "Previous argument start" },
+          ["[z"] = { query = "@class.outer", desc = "Previous class start" },
+          ["[["] = { query = "@comment.outer", desc = "Previous comment start" },
+          ["[o"] = { query = "@loop.outer", desc = "Previous loop start" },
+          ["[?"] = { query = "@conditional.outer", desc = "Previous conditional start" },
+          ["[s"] = { query = "@call.outer", desc = "Previous callsite start" },
+          ["[r"] = { query = "@return.outer", desc = "Previous return start" },
+          ["[n"] = { query = "@assignment.lhs", desc = "Previous assignment lhs" },
+        },
+        goto_previous_end = {
+          ["[K"] = { query = "@block.outer", desc = "Previous block end" },
+          ["[F"] = { query = "@function.outer", desc = "Previous function end" },
+          ["[A"] = { query = "@parameter.inner", desc = "Previous argument end" },
+          ["[Z"] = { query = "@class.outer", desc = "Previous class end" },
+        },
+      },
+      swap = {
+        enable = true,
+        swap_next = {
+          [">K"] = { query = "@block.outer", desc = "Swap next block" },
+          [">F"] = { query = "@function.outer", desc = "Swap next function" },
+          [">A"] = { query = "@parameter.inner", desc = "Swap next argument" },
+        },
+        swap_previous = {
+          ["<K"] = { query = "@block.outer", desc = "Swap previous block" },
+          ["<F"] = { query = "@function.outer", desc = "Swap previous function" },
+          ["<A"] = { query = "@parameter.inner", desc = "Swap previous argument" },
+        },
+      },
+    },
+  },
+  dependencies = {
+    "AstroNvim/astrocore",
+    opts = {
+      mappings = {
+        n = {
+          ["<M-,>"] = { "<cmd>normal [A<cr>", desc = "Previous argument end" },
+          ["<M-.>"] = { "<cmd>normal ]A<cr>", desc = "Next argument end" },
+          ["<M-<>"] = { "<cmd>normal [n<cr>", desc = "Previous assignment lhs" },
+          ["<M->>"] = { "<cmd>normal ]n<cr>", desc = "Next assignment rhs" },
+          ["<M-b>"] = { "<cmd>normal [a<cr>", desc = "Previous argument start" },
+          ["<M-h>"] = { "<cmd>normal [s<cr>", desc = "Previous callsite start" },
+          ["<M-l>"] = { "<cmd>normal ]s<cr>", desc = "Next callsite start" },
+          ["<M-g>"] = { "<cmd>normal ]o<cr>", desc = "Next loop start" },
+          ["<S-M-g>"] = { "<cmd>normal [o<cr>", desc = "Previous loop start" },
+          ["<M-v>"] = { "<cmd>normal ]?<cr>", desc = "Next conditional start" },
+          ["<S-M-v>"] = { "<cmd>normal [?<cr>", desc = "Previous conditional start" },
+          ["<M-x>"] = { "<cmd>normal ]k<cr>", desc = "Next block start" },
+          ["<S-M-x>"] = { "<cmd>normal [k<cr>", desc = "Previous block start" },
+          ["<S-M-e>"] = { "<cmd>normal ]K<cr>", desc = "Next block end" },
+          ["<S-M-p>"] = { "<cmd>normal [f<cr>", desc = "Previous function start" },
+          ["<S-M-n>"] = { "<cmd>normal ]f<cr>", desc = "next function start" },
+          ["<S-M-b>"] = { "<cmd>normal ]F<cr>", desc = "Next function end" },
+        },
+      },
     },
   },
 }
