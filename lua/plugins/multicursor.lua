@@ -32,7 +32,7 @@ return {
     -- Pressing `gaip` will add a cursor on each line of a paragraph.
     set("n", "ga", mc.addCursorOperator)
 
-    -- Pressing `<leader>miwap` will create a cursor in every match of the
+    -- Pressing `gbiwap` will create a cursor in every match of the
     -- string captured by `iw` inside range `ap`.
     -- This action is highly customizable, see `:h multicursor-operator`.
     set({ "n", "x" }, "gb", mc.operator)
