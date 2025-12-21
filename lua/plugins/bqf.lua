@@ -45,44 +45,56 @@ return {
             },
             ["<M-9>"] = {
               function()
-                vim.cmd "cprevious"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  vim.cmd "cprevious"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "Previous quickfix item",
             },
             ["<M-0>"] = {
               function()
-                vim.cmd "cnext"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  vim.cmd "cnext"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "Next quickfix item",
             },
             ["<M-(>"] = {
               function()
-                vim.cmd "cfirst"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  vim.cmd "cfirst"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "First quickfix item",
             },
             ["<M-)>"] = {
               function()
-                vim.cmd "clast"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  vim.cmd "clast"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "Last quickfix item",
             },
             ["<M-8>"] = {
               function()
-                vim.cmd "cc"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  vim.cmd "cc"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "Current quickfix item",
             },
             ["<M-*>"] = {
               function()
-                xtools.goto_nearest_qf_item()
-                vim.cmd "cc"
-                vim.cmd "norm! zz"
+                if #vim.fn.getqflist() > 0 then
+                  xtools.goto_nearest_qf_item()
+                  vim.cmd "cc"
+                  vim.cmd "norm! zz"
+                end
               end,
               desc = "Nearest quickfix item",
             },
