@@ -61,6 +61,26 @@ return {
           filter = { event = "msg_show", find = "^E486: Pattern not found:" },
           opts = { skip = true },
         },
+        {
+          filter = { event = "notify", find = "Bookmark deleted" },
+          opts = { skip = true },
+        },
+        {
+          filter = { event = "notify", find = "Sort order: ascending" },
+          opts = { skip = true },
+        },
+        {
+          filter = { event = "notify", find = "Sort order: descending" },
+          opts = { skip = true },
+        },
+        {
+          filter = { event = "notify", find = "Copied node:" },
+          opts = { skip = true },
+        },
+        {
+          filter = { event = "notify", find = "Cut node:" },
+          opts = { skip = true },
+        },
         { filter = { event = "msg_show", cmdline = "^:lua" }, view = "messages" }, -- send lua output to split
         { filter = { event = "msg_show", cmdline = "^:=" }, view = "messages" }, -- send lua output to split
         { filter = { event = "msg_show", min_height = 20 }, view = "messages" }, -- send long messages to split

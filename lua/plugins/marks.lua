@@ -8,8 +8,6 @@ return {
     opts = {
       mappings = {
         n = {
-          ["<M-{>"] = { "<cmd>normal m[<cr>", desc = "Previous Mark" },
-          ["<M-}>"] = { "<cmd>normal m]<cr>", desc = "Next Mark" },
           ["<Leader>f'"] = {
             function()
               require "marks"
