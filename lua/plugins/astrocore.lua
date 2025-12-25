@@ -48,6 +48,8 @@ return {
       -- Normal mode
       n = {
         ["<Leader>q"] = false,
+        ["<Leader>h"] = false,
+
         ["<M-q>"] = { "<cmd>close<cr>", desc = "Close window" },
         ["<C-.>"] = { "<C-w>w", desc = "Switch window" },
         ["<Leader><Tab>"] = { "<C-w>w", desc = "Switch window" },
