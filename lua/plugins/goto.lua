@@ -1,5 +1,3 @@
-local ts_utils = require "nvim-treesitter.ts_utils"
-
 -- Operator list sorted by priority (longer first)
 local OPERATORS = {
   "->",
@@ -16,6 +14,18 @@ local OPERATORS = {
   "=",
 }
 
+local function get_node()
+  return vim.treesitter.get_node()
+end
+
+local function select_node(node)
+  if not node then return end
+  local sr, sc, er, ec = node:range()
+  vim.api.nvim_win_set_cursor(0, { sr + 1, sc })
+  vim.cmd "normal! v"
+  vim.api.nvim_win_set_cursor(0, { er + 1, ec - 1 })
+end
+
 -- Find next valid operator
 local function safe_search(forward)
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -30,7 +40,7 @@ local function safe_search(forward)
       for _, op in ipairs(OPERATORS) do
         if text:sub(c, c + #op - 1) == op then
           vim.api.nvim_win_set_cursor(0, { l, c - 1 })
-          local node = ts_utils.get_node_at_cursor()
+          local node = get_node()
           if node and node:named_child_count() >= 2 then return true end
         end
       end
@@ -40,7 +50,6 @@ local function safe_search(forward)
 end
 
 local function search_operator(forward, select_child)
-  -- Exit visual mode if active
   if vim.fn.mode():match "[vV]" then
     vim.cmd("normal! " .. vim.api.nvim_replace_termcodes("<Esc>", true, true, true))
   end
@@ -50,19 +59,19 @@ local function search_operator(forward, select_child)
     return
   end
 
-  local node = ts_utils.get_node_at_cursor()
+  local node = get_node()
   if node and node:named_child_count() > select_child then
-    ts_utils.update_selection(0, node:named_child(select_child))
+    select_node(node:named_child(select_child))
   end
 end
 
 -- Keymaps
 vim.keymap.set({ "n", "v" }, "<M->>", function()
-  search_operator(true, 1) -- Next operator, select second operand
+  search_operator(true, 1)
 end, { desc = "Find next operator and select second operand" })
 
 vim.keymap.set({ "n", "v" }, "<M-<>", function()
-  search_operator(false, 0) -- Previous operator, select first operand
+  search_operator(false, 0)
 end, { desc = "Find previous operator and select first operand" })
 
 return {
