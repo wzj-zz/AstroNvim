@@ -3,21 +3,14 @@ return {
   version = "*", -- Use for stability; omit to use `main` branch for the latest features
   event = "VeryLazy",
 
+  init = function()
+    vim.g.nvim_surround_no_normal_mappings = true
+    vim.g.nvim_surround_no_visual_mappings = true
+    vim.g.nvim_surround_no_insert_mappings = true
+  end,
+
   config = function()
     require("nvim-surround").setup {
-      keymaps = {
-        insert = false,
-        insert_line = false,
-        normal = "ys",
-        normal_cur = "yss",
-        normal_line = false,
-        normal_cur_line = "yS",
-        visual = "gs",
-        visual_line = "gS",
-        delete = "ds",
-        change = "cs",
-        change_line = "cS",
-      },
       aliases = {
         ["a"] = ">",
         ["b"] = ")",
@@ -27,5 +20,30 @@ return {
         ["s"] = { "}", "]", ")", ">", '"', "'", "`" },
       },
     }
+
+    vim.keymap.set("n", "ys", "<Plug>(nvim-surround-normal)", {
+      desc = "Add a surrounding pair around a motion (normal mode)",
+    })
+    vim.keymap.set("n", "yss", "<Plug>(nvim-surround-normal-cur)", {
+      desc = "Add a surrounding pair around the current line (normal mode)",
+    })
+    vim.keymap.set("n", "yS", "<Plug>(nvim-surround-normal-cur-line)", {
+      desc = "Add a surrounding pair around the current line, on new lines (normal mode)",
+    })
+    vim.keymap.set("x", "gs", "<Plug>(nvim-surround-visual)", {
+      desc = "Add a surrounding pair around a visual selection",
+    })
+    vim.keymap.set("x", "gS", "<Plug>(nvim-surround-visual-line)", {
+      desc = "Add a surrounding pair around a visual selection, on new lines",
+    })
+    vim.keymap.set("n", "ds", "<Plug>(nvim-surround-delete)", {
+      desc = "Delete a surrounding pair",
+    })
+    vim.keymap.set("n", "cs", "<Plug>(nvim-surround-change)", {
+      desc = "Change a surrounding pair",
+    })
+    vim.keymap.set("n", "cS", "<Plug>(nvim-surround-change-line)", {
+      desc = "Change a surrounding pair, putting replacements on new lines",
+    })
   end,
 }

@@ -106,6 +106,22 @@ return {
               function() xtools.filter_qflist_current_buffer() end,
               desc = "Filter qflist in current buffer",
             },
+            ["<Leader>so"] = {
+              function()
+                local pattern = vim.fn.input "Search qflist content"
+                xtools.search_qflist_content(pattern)
+                vim.cmd "copen"
+              end,
+              desc = "Search qflist content",
+            },
+            ["<Leader>sv"] = {
+              function()
+                local pattern = vim.fn.input "Filter qflist content"
+                xtools.filter_qflist_content(pattern)
+                vim.cmd "copen"
+              end,
+              desc = "Filter qflist content",
+            },
           },
           v = {
             ["<Leader>vv"] = {

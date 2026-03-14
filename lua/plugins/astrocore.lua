@@ -7,14 +7,62 @@ local xtools = require "xtools"
 ---@type LazySpec
 return {
   "AstroNvim/astrocore",
+  version = false,
+  branch = "v3",
   ---@type AstroCoreOpts
   opts = {
+    treesitter = {
+      auto_install = true,
+      enabled = function(_, bufnr) return not require("astrocore.buffer").is_large(bufnr) end,
+      highlight = true,
+      indent = true,
+      ensure_installed = {
+        "lua",
+        "vim",
+        "bash",
+        "zig",
+        "ql",
+        "rust",
+        "c_sharp",
+        "python",
+        "asm",
+        "nasm",
+        "c",
+        "cpp",
+        "objc",
+        "cuda",
+        "proto",
+        "cmake",
+        "go",
+        "gomod",
+        "gosum",
+        "gowork",
+        "java",
+        "javadoc",
+        "javascript",
+        "typescript",
+        "tsx",
+        "jsdoc",
+        "json",
+        "jsonc",
+        "xml",
+        "toml",
+        "yaml",
+        "html",
+        "markdown",
+        "markdown_inline",
+      },
+    },
     sessions = {
       autosave = { last = false, cwd = false },
     },
     -- Configure core features of AstroNvim
     features = {
-      large_buf = { size = 1024 * 256, lines = 10000 }, -- set global limits for large files for disabling features like treesitter
+      large_buf = {
+        size = 1024 * 1024,
+        lines = false,
+        line_length = false,
+      }, -- set global limits for large files for disabling features like treesitter
       autopairs = true, -- enable autopairs at start
       cmp = true, -- enable completion at start
       diagnostics = { virtual_text = true, virtual_lines = false }, -- diagnostic settings on startup
@@ -53,23 +101,6 @@ return {
         ["<M-q>"] = { "<cmd>close<cr>", desc = "Close window" },
         ["<C-.>"] = { "<C-w>w", desc = "Switch window" },
         ["<Leader><Tab>"] = { "<C-w>w", desc = "Switch window" },
-
-        ["<Leader>so"] = {
-          function()
-            local pattern = vim.fn.input "Search qflist content"
-            xtools.search_qflist_content(pattern)
-            vim.cmd "copen"
-          end,
-          desc = "Search qflist content",
-        },
-        ["<Leader>sv"] = {
-          function()
-            local pattern = vim.fn.input "Filter qflist content"
-            xtools.filter_qflist_content(pattern)
-            vim.cmd "copen"
-          end,
-          desc = "Filter qflist content",
-        },
 
         ["<M-d>"] = { "<cmd>normal gd<cr>", desc = "goto definition" },
         ["<M-r>"] = { "<cmd>normal grr<cr>", desc = "goto references" },
