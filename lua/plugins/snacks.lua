@@ -35,7 +35,12 @@ return {
     { "<Leader>sb", function() Snacks.picker.lines() end, desc = "Buffer Lines" },
     { "<Leader>sB", function() Snacks.picker.grep_buffers() end, desc = "Grep Open Buffers" },
     { "<Leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
-    { "<Leader>sw", function() Snacks.picker.grep_word() end, desc = "Visual selection or word", mode = { "n", "x" } },
+    {
+      "<Leader>sw",
+      function() Snacks.picker.grep_word() end,
+      desc = "Grep visual selection or current word",
+      mode = { "n", "x" },
+    },
     { "<Leader>sf", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
     -- search
     { "<Leader>sr", function() Snacks.picker.registers() end, desc = "Registers" },
@@ -63,8 +68,31 @@ return {
     { "<Leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "LSP Symbols" },
     { "<Leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
     -- Other
-    { "<M-p>", function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference", mode = { "n", "t" } },
-    { "<M-n>", function() Snacks.words.jump(vim.v.count1) end, desc = "Next Reference", mode = { "n", "t" } },
+    {
+      "<M-p>",
+      function() Snacks.words.jump(-vim.v.count1) end,
+      desc = "Prev Reference",
+      mode = { "n", "t" },
+    },
+    {
+      "<M-n>",
+      function() Snacks.words.jump(vim.v.count1) end,
+      desc = "Next Reference",
+      mode = { "n", "t" },
+    },
+    {
+      "<Leader>gi",
+      function() require("snacks").gh.issue() end,
+      desc = "GitHub Issues",
+      mode = { "n", "t" },
+    },
+    {
+      "<Leader>gp",
+      function() require("snacks").gh.pr() end,
+      desc = "GitHub Pull Requests",
+      mode = { "n", "t" },
+    },
+
     { "<Leader>sz", function() Snacks.zen() end, desc = "Toggle Zen Mode" },
     { "<Leader>.", function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
     { "<Leader>s.", function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
