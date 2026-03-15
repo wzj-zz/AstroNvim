@@ -49,7 +49,7 @@ return {
     },
   },
   { import = "astrocommunity.pack.spring-boot" },
-  -- { import = "astrocommunity.pack.cs" },
+  { import = "astrocommunity.pack.cs" },
   { import = "astrocommunity.pack.json" },
   { import = "astrocommunity.pack.xml" },
   { import = "astrocommunity.pack.yaml" },
