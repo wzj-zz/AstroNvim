@@ -11,8 +11,12 @@ return {
   { "AstroNvim/astrocommunity", branch = "v6" },
 
   { import = "astrocommunity.pack.lua" },
-  { import = "astrocommunity.pack.python" },
-  -- { import = "astrocommunity.pack.python-ruff" },
+
+  { import = "astrocommunity.pack.python.base" },
+  { import = "astrocommunity.pack.python.basedpyright" },
+  { import = "astrocommunity.pack.python.black" },
+  { import = "astrocommunity.pack.python.isort" },
+
   { import = "astrocommunity.pack.typescript" },
   { import = "astrocommunity.pack.cpp" },
   {
@@ -49,20 +53,13 @@ return {
     },
   },
   { import = "astrocommunity.pack.spring-boot" },
-  { import = "astrocommunity.pack.cs" },
+  -- { import = "astrocommunity.pack.cs" },
   { import = "astrocommunity.pack.json" },
   { import = "astrocommunity.pack.xml" },
   { import = "astrocommunity.pack.yaml" },
   { import = "astrocommunity.pack.toml" },
   { import = "astrocommunity.pack.markdown" },
 
-  { import = "astrocommunity.git.blame-nvim" },
-  { import = "astrocommunity.git.git-blame-nvim" },
-  { import = "astrocommunity.git.gitgraph-nvim" },
-
-  { import = "astrocommunity.project.projectmgr-nvim" },
-
-  { import = "astrocommunity.color.transparent-nvim" },
   { import = "astrocommunity.colorscheme.catppuccin" },
   { import = "astrocommunity.utility.noice-nvim" },
 }
