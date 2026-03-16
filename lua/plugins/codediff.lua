@@ -74,8 +74,11 @@ return {
         unstage_all = "U",
         restore = "X",
         fold_open = "zo",
+        fold_open_recursive = "zO",
         fold_close = "zc",
+        fold_close_recursive = "zC",
         fold_toggle = "za",
+        fold_toggle_recursive = "zA",
         fold_open_all = "zR",
         fold_close_all = "zM",
       },
@@ -84,8 +87,11 @@ return {
         refresh = "R",
         toggle_view_mode = "i",
         fold_open = "zo",
+        fold_open_recursive = "zO",
         fold_close = "zc",
+        fold_close_recursive = "zC",
         fold_toggle = "za",
+        fold_toggle_recursive = "zA",
         fold_open_all = "zR",
         fold_close_all = "zM",
       },
@@ -106,4 +112,3 @@ return {
     },
   },
 }
-
