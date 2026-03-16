@@ -111,4 +111,20 @@ return {
       },
     },
   },
+  config = function(_, opts)
+    require("codediff").setup(opts)
+
+    local ok, welcome_window = pcall(require, "codediff.ui.view.welcome_window")
+    if not ok or not welcome_window then return end
+
+    if welcome_window.apply_normal then
+      local orig_apply_normal = welcome_window.apply_normal
+      welcome_window.apply_normal = function(winid) pcall(orig_apply_normal, winid) end
+    end
+
+    if welcome_window.apply then
+      local orig_apply = welcome_window.apply
+      welcome_window.apply = function(winid) pcall(orig_apply, winid) end
+    end
+  end,
 }
