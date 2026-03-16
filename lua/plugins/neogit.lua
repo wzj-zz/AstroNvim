@@ -6,6 +6,7 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
     "sindrets/diffview.nvim",
+    "esmuellert/codediff.nvim",
     { "AstroNvim/astroui", opts = { icons = { Neogit = "󰰔" } } },
     {
       "AstroNvim/astrocore",
@@ -56,7 +57,12 @@ return {
           return require("telescope").extensions.fzf.native_fzf_sorter()
         end
       end,
-      integrations = { telescope = utils.is_available "telescope.nvim" },
+      integrations = {
+        telescope = utils.is_available "telescope.nvim",
+        diffview = false,
+        codediff = true,
+      },
+      diff_viewer = "codediff",
     })
   end,
 }
