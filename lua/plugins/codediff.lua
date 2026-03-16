@@ -1,26 +1,6 @@
 if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
 
 local function set_codediff_aliases()
-  local function focus_modified_window()
-    local target_win
-    local target_col = -1
-
-    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      local filetype = vim.bo[buf].filetype
-      if filetype ~= "codediff-explorer" and filetype ~= "codediff-history" then
-        local pos = vim.api.nvim_win_get_position(win)
-        local col = pos[2]
-        if col > target_col then
-          target_col = col
-          target_win = win
-        end
-      end
-    end
-
-    if target_win and vim.api.nvim_win_is_valid(target_win) then vim.api.nvim_set_current_win(target_win) end
-  end
-
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     local buf = vim.api.nvim_win_get_buf(win)
     local filetype = vim.bo[buf].filetype
@@ -28,13 +8,12 @@ local function set_codediff_aliases()
     if filetype == "codediff-explorer" or filetype == "codediff-history" then
       vim.keymap.set("n", "o", "<CR>", { buffer = buf, remap = true, desc = "Open selected entry" })
       vim.keymap.set("n", "l", "<CR>", { buffer = buf, remap = true, desc = "Open selected entry" })
+      vim.keymap.set("n", "<M-e>", function() vim.api.nvim_command "2wincmd l" end, {
+        buffer = buf,
+        desc = "Goto current file",
+        silent = true,
+      })
     end
-
-    vim.keymap.set("n", "<M-e>", focus_modified_window, {
-      buffer = buf,
-      desc = "Focus modified diff pane",
-      silent = true,
-    })
   end
 end
 
@@ -127,3 +106,4 @@ return {
     },
   },
 }
+
