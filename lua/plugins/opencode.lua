@@ -200,7 +200,7 @@ return {
           enabled = true,
         },
         diagnostics = {
-          enabled = true,
+          enabled = false,
           info = false,
           warning = true,
           error = true,
