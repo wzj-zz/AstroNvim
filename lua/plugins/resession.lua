@@ -2,6 +2,11 @@ if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
 
 return {
   "stevearc/resession.nvim",
+  config = function()
+    local resession = require "resession"
+    resession.setup()
+    resession.add_hook("post_load", function() vim.cmd "silent! bufdo e" end)
+  end,
   specs = {
     {
       "AstroNvim/astrocore",
