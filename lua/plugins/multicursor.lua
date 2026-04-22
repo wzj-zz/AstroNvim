@@ -37,10 +37,6 @@ return {
     -- This action is highly customizable, see `:h multicursor-operator`.
     set({ "n", "x" }, "gb", mc.operator)
 
-    -- Increment/decrement sequences, treaing all cursors as one sequence.
-    set({ "n", "x" }, "g<c-a>", mc.sequenceIncrement)
-    set({ "n", "x" }, "g<c-x>", mc.sequenceDecrement)
-
     -- Add and remove cursors with alt + left click.
     set("n", "<M-leftmouse>", mc.handleMouse)
     set("n", "<M-leftdrag>", mc.handleMouseDrag)
