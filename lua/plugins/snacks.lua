@@ -119,24 +119,6 @@ return {
         n = {
           ["<M-w>"] = { function() Snacks.picker.buffers() end, desc = "Find Buffer" },
           ["<Leader>s"] = { name = "Snacks" },
-          ["<Leader>fp"] = {
-            function()
-              Snacks.picker.projects {
-                win = {
-                  input = {
-                    keys = {
-                      ["<c-e>"] = { { "tcd", "picker_explorer" }, mode = { "n", "i" } },
-                      ["<c-f>"] = { { "tcd", "picker_files" }, mode = { "n", "i" } },
-                      ["<c-g>"] = { { "tcd", "picker_grep" }, mode = { "n", "i" } },
-                      ["<c-r>"] = { { "tcd", "picker_recent" }, mode = { "n", "i" } },
-                      ["<c-w>"] = { { "tcd", "cancel" }, mode = { "n", "i" } },
-                    },
-                  },
-                },
-              }
-            end,
-            desc = "Find projects",
-          },
           ["<Leader>fz"] = {
             function()
               Snacks.picker.zoxide {
