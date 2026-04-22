@@ -9,7 +9,6 @@ return {
     { "f<BS>", desc = "HiErase" },
     { "f<C-l>", desc = "HiClear" },
     { "f<Tab>", desc = "HiFind" },
-
     {
       "f<C-s>",
       function()
@@ -29,6 +28,16 @@ return {
         xtools.cd(old_path)
       end,
       desc = "Load Highlight",
+    },
+    {
+      "f<C-x>",
+      function()
+        local old_path = xtools.cwd()
+        xtools.cd(xtools.get_buf_file_dir())
+        vim.fn.delete("./" .. xtools.get_buf_file_name() .. ".hl")
+        xtools.cd(old_path)
+      end,
+      desc = "Delete Highlight",
     },
 
     { "<S-M-j>", "<cmd>Hi><CR>", desc = "Next Recently Set Highlight" },
