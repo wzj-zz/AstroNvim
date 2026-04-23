@@ -111,8 +111,6 @@ return {
         ["<M-2>"] = { "<cmd>tabn 2<cr>", desc = "goto tabn 2" },
         ["<M-3>"] = { "<cmd>tabn 3<cr>", desc = "goto tabn 3" },
         ["<M-4>"] = { "<cmd>tabn 4<cr>", desc = "goto tabn 4" },
-        ["<Leader>tx"] = { "<cmd>tabclose<cr>", desc = "tabclose" },
-        ["<Leader>tX"] = { "<cmd>tabonly<cr>", desc = "tabonly" },
 
         -- navigate buffer and tabs
         ["<S-M-i>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
