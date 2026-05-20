@@ -27,11 +27,16 @@ return {
             local xtools_path
             if vim.fn.has "win64" == 1 then
               xtools_path = "D:\\tools"
+            elseif vim.fn.has "wsl" == 1 then
+              xtools_path = "/mnt/d/tools"
+            end
+
+            if xtools_path then
               vim.fn.chdir(xtools_path)
               require("neogit").open { cwd = xtools_path }
             end
           end,
-          desc = "Open Neogit In xtools (only win64)",
+          desc = "Open Neogit In xtools",
         }
       end,
     },
