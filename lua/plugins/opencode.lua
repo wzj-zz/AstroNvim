@@ -76,7 +76,9 @@ return {
         input_window = {
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
           ["<C-r>"] = { "rename_session", mode = { "n", "i" }, desc = "Rename session" },
-          ["<C-b>"] = { "select_child_session", mode = { "n", "i" }, desc = "Child sessions" },
+          ["<C-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
+          ["<C-j>"] = { "navigate_session_tree", { "sibling", "picker" }, mode = { "n", "i" }, desc = "Sibling sessions" },
+          ["<C-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
           ["<C-a>"] = { "select_session", mode = { "n", "i" }, desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = { "n", "i" }, desc = "MCP picker" },
           ["<C-z>"] = { "toggle_zoom", mode = { "n", "i" }, desc = "Toggle window zoom" },
@@ -99,7 +101,6 @@ return {
         },
         output_window = {
           ["<C-r>"] = { "rename_session", mode = "n", desc = "Rename session" },
-          ["<C-b>"] = { "select_child_session", mode = "n", desc = "Child sessions" },
           ["<C-a>"] = { "select_session", mode = "n", desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = "n", desc = "MCP picker" },
           ["<C-z>"] = { "toggle_zoom", mode = "n", desc = "Toggle window zoom" },
