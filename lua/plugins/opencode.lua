@@ -29,13 +29,21 @@ return {
     "sudo-tee/opencode.nvim",
     cmd = { "Opencode" },
     keys = {
-      { "<M-o>", mode = { "n", "i" }, desc = "Toggle windows" },
-      { "<Leader>an", desc = "New session input" },
-      { "<Leader>a/", mode = { "n", "x" }, desc = "Quick chat" },
-      { "<Leader>aa", desc = "Session picker" },
-      { "<Leader>ax", desc = "Restart server" },
-      { "<Leader>ay", mode = "x", desc = "Add selection" },
-      { "<Leader>aY", mode = "x", desc = "Add inline selection" },
+      { "<M-o>",       mode = { "n", "i" },             desc = "Toggle windows" },
+      { "<Leader>an",  desc = "New session input" },
+      { "<Leader>a/",  mode = { "n", "x" },             desc = "Quick chat" },
+      { "<Leader>aa",  desc = "Session picker" },
+      { "<Leader>ad",  desc = "Open diff" },
+      { "<Leader>ac",  desc = "Close diff" },
+      { "<Leader>ava", desc = "Revert all last prompt" },
+      { "<Leader>avt", desc = "Revert this last prompt" },
+      { "<Leader>avA", desc = "Revert all session" },
+      { "<Leader>avT", desc = "Revert this session" },
+      { "<Leader>art", desc = "Restore snapshot file" },
+      { "<Leader>ara", desc = "Restore snapshot all" },
+      { "<Leader>ax",  desc = "Restart server" },
+      { "<Leader>ay",  mode = "x",                      desc = "Add selection" },
+      { "<Leader>aY",  mode = "x",                      desc = "Add inline selection" },
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -69,6 +77,14 @@ return {
           ["<Leader>an"] = { "open_input_new_session", desc = "New session input" },
           ["<Leader>a/"] = { "quick_chat", mode = { "n", "x" }, desc = "Quick chat" },
           ["<Leader>aa"] = { "select_session", desc = "Session picker" },
+          ["<Leader>ad"] = { "diff_open", desc = "Open diff" },
+          ["<Leader>ac"] = { "diff_close", desc = "Close diff" },
+          ["<Leader>ava"] = { "diff_revert_all_last_prompt", desc = "Revert all last prompt" },
+          ["<Leader>avt"] = { "diff_revert_this_last_prompt", desc = "Revert this last prompt" },
+          ["<Leader>avA"] = { "diff_revert_all", desc = "Revert all session" },
+          ["<Leader>avT"] = { "diff_revert_this", desc = "Revert this session" },
+          ["<Leader>art"] = { "diff_restore_snapshot_file", desc = "Restore snapshot file" },
+          ["<Leader>ara"] = { "diff_restore_snapshot_all", desc = "Restore snapshot all" },
           ["<Leader>ax"] = { restart_opencode_server, desc = "Restart server" },
           ["<Leader>ay"] = { "add_visual_selection", mode = "x", desc = "Add selection" },
           ["<Leader>aY"] = { "add_visual_selection_inline", mode = "x", desc = "Add inline selection" },
@@ -77,7 +93,12 @@ return {
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
           ["<C-r>"] = { "rename_session", mode = { "n", "i" }, desc = "Rename session" },
           ["<C-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
-          ["<C-j>"] = { "navigate_session_tree", { "sibling", "picker" }, mode = { "n", "i" }, desc = "Sibling sessions" },
+          ["<C-j>"] = {
+            "navigate_session_tree",
+            { "sibling", "picker" },
+            mode = { "n", "i" },
+            desc = "Sibling sessions",
+          },
           ["<C-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
           ["<C-a>"] = { "select_session", mode = { "n", "i" }, desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = { "n", "i" }, desc = "MCP picker" },
@@ -96,6 +117,8 @@ return {
           ["<Up>"] = { "prev_prompt_history", mode = { "n", "i" }, desc = "Prev history" },
           ["<Down>"] = { "next_prompt_history", mode = { "n", "i" }, desc = "Next history" },
           ["<M-m>"] = { "switch_mode", desc = "Switch mode" },
+          ["<M-n>"] = { "diff_next", mode = { "n", "i" }, desc = "Next diff" },
+          ["<M-p>"] = { "diff_prev", mode = { "n", "i" }, desc = "Prev diff" },
           ["<M-t>"] = { "toggle_tool_output", mode = { "n", "i" }, desc = "Toggle tool output" },
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n", "i" }, desc = "Toggle reasoning output" },
         },
@@ -112,6 +135,8 @@ return {
           ["<C-p>"] = { "prev_message", desc = "Prev message" },
           ["<Tab>"] = { "toggle_pane", mode = { "n", "i" }, desc = "Toggle pane" },
           ["i"] = { "focus_input", mode = { "n" }, desc = "Focus input" },
+          ["<M-n>"] = { "diff_next", mode = { "n" }, desc = "Next diff" },
+          ["<M-p>"] = { "diff_prev", mode = { "n" }, desc = "Prev diff" },
           ["gr"] = { "references", mode = { "n" }, desc = "References" },
           ["a"] = { "permission", { "accept" }, mode = { "n" }, desc = "Accept once" },
           ["A"] = { "permission", { "accept_all" }, mode = { "n" }, desc = "Accept all" },
@@ -241,9 +266,11 @@ return {
       require("opencode").setup(opts)
 
       local ok, wk = pcall(require, "which-key")
-      if ok then wk.add {
-        { "<Leader>a", group = "Opencode" },
-      } end
+      if ok then
+        wk.add {
+          { "<Leader>a", group = "Opencode" },
+        }
+      end
     end,
   },
 }
