@@ -555,17 +555,8 @@ Treesitter 文本对象交换：
 需要安装 `opencode`：
 
 - `<M-o>`：打开或关闭 AI 窗口
-- `<Leader>an`：新建会话输入框
 - `<Leader>aa`：选择会话
 - `<Leader>a/`：快速对话
-- `<Leader>ad`：打开 diff 视图
-- `<Leader>ac`：关闭 diff 视图
-- `<Leader>ava`：撤销最近一轮 prompt 的所有文件改动
-- `<Leader>avt`：撤销最近一轮 prompt 的当前文件改动
-- `<Leader>avA`：撤销当前 session 的所有文件改动
-- `<Leader>avT`：撤销当前 session 的当前文件改动
-- `<Leader>art`：将当前文件恢复到 restore point
-- `<Leader>ara`：将所有文件恢复到 restore point
 - Visual 模式下 `<Leader>ay`：把选中代码作为上下文项加入会话，不直接插入输入框
 - Visual 模式下 `<Leader>aY`：把选中代码以内联代码块形式直接插入输入框
 - `<Leader>ax`：重启 opencode 服务
@@ -584,11 +575,10 @@ AI 输入窗口中可用：
 - `<C-e>`：切换 variant
 - `<C-t>`：查看时间线
 - `<C-c>`：取消当前任务
+- Normal 模式下 `<C-n>`：新建会话输入框
 - `<Tab>`：切换 pane
 - `<Up>` / `<Down>`：上一条或下一条输入历史
 - `<M-m>`：切换模式
-- `<M-n>`：跳到下一个 diff 文件
-- `<M-p>`：跳到上一个 diff 文件
 - `<M-v>`：粘贴图片
 - `<M-t>`：切换 tool output
 - `<M-r>`：切换 reasoning output
@@ -599,6 +589,9 @@ AI 输入窗口中可用：
 
 AI 输出窗口中可用：
 
+- `<C-r>`：重命名会话
+- `<C-a>`：切换会话
+- `<C-o>`：MCP 选择器
 - `i`：回到输入框
 - `gr`：查看引用
 - `<C-z>`：切换窗口缩放
@@ -607,16 +600,13 @@ AI 输出窗口中可用：
 - `<C-t>`：查看时间线
 - `<C-c>`：取消当前任务
 - `<Tab>`：切换 pane
-- `<M-n>`：跳到下一个 diff 文件
-- `<M-p>`：跳到上一个 diff 文件
+- `<M-j>`：跳到下一个 snapshot 标记
+- `<M-k>`：跳到上一个 snapshot 标记
 - `a` / `A`：接受权限请求
 - `d`：拒绝权限请求
 - `<M-t>`：切换 tool output
 - `<M-r>`：切换 reasoning output
 - `<C-n>` / `<C-p>`：上下切换消息
-- `<Leader>adm`：调试当前消息
-- `<Leader>ado`：调试输出内容
-- `<Leader>ads`：调试当前会话
 
 ### 代码片段执行
 
