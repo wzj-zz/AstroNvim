@@ -3,6 +3,12 @@ if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
 -- if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
 
 local xtools = require "xtools"
+local is_windows = vim.fn.has "win32" == 1
+local default_shell = is_windows and (vim.fn.executable "pwsh.exe" == 1 and "pwsh.exe" or "cmd.exe") or vim.o.shell
+local default_shellcmdflag = is_windows and "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
+  or vim.o.shellcmdflag
+local default_shellquote = is_windows and "" or vim.o.shellquote
+local default_shellxquote = is_windows and "" or vim.o.shellxquote
 
 ---@type LazySpec
 return {
@@ -79,7 +85,11 @@ return {
       opt = { -- vim.opt.<key>
         relativenumber = true, -- sets vim.opt.relativenumber
         number = true, -- sets vim.opt.number
+        shellcmdflag = default_shellcmdflag,
+        shellquote = default_shellquote,
         spell = false, -- sets vim.opt.spell
+        shell = default_shell,
+        shellxquote = default_shellxquote,
         signcolumn = "yes", -- sets vim.opt.signcolumn to yes
         wrap = true, -- sets vim.opt.wrap
         wrapscan = false, -- sets vim.opt.wrapscan
@@ -97,6 +107,7 @@ return {
       n = {
         ["<Leader>q"] = false,
         ["<Leader>h"] = false,
+        ["<C-z>"] = { function() xtools.toggle_window_zoom() end, desc = "Toggle window zoom" },
 
         ["<M-q>"] = { "<cmd>close<cr>", desc = "Close window" },
         ["<C-.>"] = { "<C-w>w", desc = "Switch window" },
@@ -173,16 +184,11 @@ return {
           end,
           desc = "Sync Neotree With Current Buffer",
         },
-        ["<Leader>,s"] = {
-          function()
-            xtools.new_term_cmd_vertical {
-              cmd = vim.o.shell,
-              display_name = "shell",
-            }
-          end,
+        ["<M-/>"] = {
+          function() xtools.toggle_shell() end,
           desc = "ToggleTerm shell",
         },
-        ["<Leader>,S"] = {
+        ["<Leader>,s"] = {
           function()
             xtools.new_term_cmd_vertical {
               cmd = "xs",
@@ -274,6 +280,14 @@ return {
       -- Terminal mode
       t = {
         ["<C-l>"] = false,
+        ["<M-w>"] = {
+          [[<C-\><C-n><cmd>lua Snacks.picker.buffers()<cr>]],
+          desc = "Find Buffer",
+        },
+        ["<M-/>"] = {
+          [[<C-\><C-n><cmd>lua require("xtools").toggle_shell()<cr>]],
+          desc = "ToggleTerm shell",
+        },
         ["<M-q>"] = {
           "<cmd>close<cr>",
           desc = "Close buffer",
@@ -283,6 +297,7 @@ return {
       -- Insert mode
       i = {
         ["<C-s>"] = { "<Esc>:w<cr>", desc = "Save" },
+        ["<C-z>"] = { '<Esc><cmd>lua require("xtools").toggle_window_zoom()<cr>', desc = "Toggle window zoom" },
         ["<C-v>"] = { "<cmd>normal P<cr><Right>", desc = "Paste from clipboard" },
         ["<C-h>"] = { "<C-w>", desc = "Delete word" },
 

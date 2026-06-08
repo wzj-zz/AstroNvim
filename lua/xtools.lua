@@ -1,18 +1,27 @@
 local M = {}
 
+-- 这些状态只在本模块内部使用，用来支撑 shell 复用和窗口缩放恢复。
+local shell_terminal
+local zoomed_window
+local zoom_restore_cmd
+
 ------------------------------------------------------------------------------
 -- neovim
 
 function M.get_clip() return vim.fn.getreg "+" end
+
 function M.set_clip(data) return vim.fn.setreg("+", data) end
 
 function M.isdir(path) return vim.fn.isdirectory(path) == 1 end
+
 function M.isfile(path) return vim.fn.filereadable(path) == 1 end
 
 function M.cwd() return vim.fn.getcwd() end
+
 function M.cd(path) vim.fn.chdir(path) end
 
 function M.filename(path) return vim.fn.fnamemodify(path, ":t") end
+
 function M.dirname(path) return vim.fn.fnamemodify(path, ":h") end
 
 function M.get_buf_file_path()
@@ -190,15 +199,35 @@ end
 
 function M.run(cmd, input) return vim.fn.system(cmd, input) end
 
+function M.toggle_window_zoom()
+  -- 在当前窗口的“放大”和“恢复原布局”之间切换。
+  local current_win = vim.api.nvim_get_current_win()
+
+  if zoomed_window == current_win and zoom_restore_cmd then
+    vim.cmd(zoom_restore_cmd)
+    zoomed_window = nil
+    zoom_restore_cmd = nil
+    return
+  end
+
+  zoomed_window = current_win
+  zoom_restore_cmd = vim.fn.winrestcmd()
+  vim.cmd "wincmd |"
+  vim.cmd "wincmd _"
+end
+
 ------------------------------------------------------------------------------
 -- win
 
 function M.winb(text)
+  -- 在底部分屏显示文本，适合较宽、偏日志型的输出。
+  local bottom_window_ratio = 0.35
+  local side_window_ratio = 0.5
   return require("snacks").win {
     text = text,
     position = "bottom",
-    height = 0.4,
-    width = 0.4,
+    height = bottom_window_ratio,
+    width = side_window_ratio,
     wo = {
       number = true,
     },
@@ -206,11 +235,13 @@ function M.winb(text)
 end
 
 function M.winf(text)
+  -- 在居中浮窗显示文本，适合较短、需要聚焦查看的输出。
+  local float_window_ratio = 0.6
   return require("snacks").win {
     text = text,
     position = "float",
-    height = 0.4,
-    width = 0.4,
+    height = float_window_ratio,
+    width = float_window_ratio,
     wo = {
       number = true,
     },
@@ -218,28 +249,66 @@ function M.winf(text)
 end
 
 function M.winv(text)
+  -- 在右侧窗格显示文本，布局上和竖向终端保持一致。
+  local side_window_ratio = 0.5
   return require("snacks").win {
     text = text,
     position = "right",
-    height = 0.4,
-    width = 0.4,
+    height = 1,
+    width = side_window_ratio,
     wo = {
       number = true,
     },
   }
 end
 
-------------------------------------------------------------------------------
 -- toggleterm
 
 function M.new_term_cmd_vertical(opts)
+  -- 在右侧打开半屏终端；`normal_mode = true` 时用于只读输出场景。
+  local vertical_term_width_ratio = 0.5
   local term = require("toggleterm.terminal").Terminal:new(opts)
-  term:toggle(80, "vertical")
+  term:toggle(math.floor(vim.o.columns * vertical_term_width_ratio), "vertical")
+  if opts.normal_mode then
+    vim.schedule(function()
+      if vim.bo.buftype == "terminal" then
+        vim.cmd.stopinsert()
+        vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = 0, silent = true })
+      end
+    end)
+  end
+  return term
 end
 
 function M.new_term_cmd_float(opts)
+  -- 打开浮动终端；`normal_mode = true` 时用于只读输出场景。
   local term = require("toggleterm.terminal").Terminal:new(opts)
   term:toggle(80, "float")
+  if opts.normal_mode then
+    vim.schedule(function()
+      if vim.bo.buftype == "terminal" then
+        vim.cmd.stopinsert()
+        vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = 0, silent = true })
+      end
+    end)
+  end
+  return term
+end
+
+function M.toggle_shell()
+  -- 复用同一个交互 shell 终端，并始终跟随当前 `vim.o.shell`。
+  local vertical_term_width_ratio = 0.5
+  local shell_cmd = vim.o.shell
+  if not shell_terminal or shell_terminal.cmd ~= shell_cmd then
+    shell_terminal = require("toggleterm.terminal").Terminal:new {
+      cmd = shell_cmd,
+    }
+  end
+
+  shell_terminal:toggle(math.floor(vim.o.columns * vertical_term_width_ratio), "vertical")
+  vim.schedule(function()
+    if vim.bo.buftype == "terminal" then vim.cmd.startinsert() end
+  end)
 end
 
 ------------------------------------------------------------------------------
@@ -249,12 +318,12 @@ function M.adjust_path_from_clip() return M.run "xt -b c2V0X2NsaXAoZmwwKGdldF9jb
 
 function M.xtools_exec_float(code)
   M.set_clip(code)
-  M.new_term_cmd_float { cmd = "xt -c -d", display_name = "xtools_exec", close_on_exit = false }
+  M.new_term_cmd_float { cmd = "xt -c -d", display_name = "xtools_exec", close_on_exit = false, normal_mode = true }
 end
 
 function M.xtools_exec_vertical(code)
   M.set_clip(code)
-  M.new_term_cmd_vertical { cmd = "xt -c -d", display_name = "xtools_exec", close_on_exit = false }
+  M.new_term_cmd_vertical { cmd = "xt -c -d", display_name = "xtools_exec", close_on_exit = false, normal_mode = true }
 end
 
 function M.xtools_eval(code)

@@ -88,7 +88,7 @@ return {
 
           ["<M-{>"] = { "<cmd>BookmarksGotoPrevInList<cr>", desc = "Prev Bookmark (by order id)" },
           ["<M-}>"] = { "<cmd>BookmarksGotoNextInList<cr>", desc = "Next Bookmark (by order id)" },
-          ["<M-/>"] = {
+          ["<M-?>"] = {
             function()
               switch_to_session_bookmark_list()
               vim.cmd "BookmarksTree"
