@@ -401,22 +401,23 @@ Diffview 视图中可用：
 
 ### 书签
 
-- `<Leader>mn`：新建书签列表
-- `<Leader>mm`：添加书签
-- `<Leader>m;`：给当前书签写说明
-- `<Leader>ma`：打开书签命令列表
-- `<Leader>mf`：跳转到书签
-- `<Leader>mg`：只在已加书签的文件里搜索
-- `<Leader>mr`：重绑失效书签
-- `<Leader>mv`：查看当前书签信息
-- `<Leader>mi`：跳到当前书签的入链书签
-- `<Leader>mo`：跳到当前书签的出链书签
-- `<Leader>ml`：链接书签
-- `<Leader>ms`：批量给选中文件加书签
-- `<Leader>mq`：查询书签
+使用 `xmark.nvim` 管理书签和书签列表。
+
+- `<Leader>mm`：添加或更新当前书签
+- `<Leader>mt`：切换当前书签状态
+- `<Leader>md`：删除当前书签
+- `<Leader>mc`：编辑当前书签说明
+- `<Leader>mp`：跳到上一个书签
+- `<Leader>mn`：跳到下一个书签
+- `<Leader>mP`：跳到第一个书签
+- `<Leader>mN`：跳到最后一个书签
+- `<Leader>mf`：选择并跳转书签
+- `<Leader>ml`：切换书签列表
+- `<Leader>ma`：新建书签列表
+- `<Leader>mr`：重命名当前书签列表
+- `<Leader>me`：编辑当前书签列表顺序
 - `<M-{>`：跳到上一个书签
 - `<M-}>`：跳到下一个书签
-- `<M-?>`：打开书签树
 
 ### 本地快捷操作
 

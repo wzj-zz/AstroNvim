@@ -62,10 +62,6 @@ return {
           opts = { skip = true },
         },
         {
-          filter = { event = "notify", find = "Bookmark deleted" },
-          opts = { skip = true },
-        },
-        {
           filter = { event = "notify", find = "Sort order: ascending" },
           opts = { skip = true },
         },
