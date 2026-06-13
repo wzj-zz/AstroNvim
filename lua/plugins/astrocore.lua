@@ -115,6 +115,26 @@ return {
         ["<M-r>"] = { "<cmd>normal grr<cr>", desc = "goto references" },
         ["<M-y>"] = { "<cmd>normal gy<cr>", desc = "goto type definition" },
         ["<M-i>"] = { "<cmd>normal gri<cr>", desc = "goto implementation" },
+        ["<M-[>"] = {
+          function()
+            if vim.wo.diff then
+              vim.cmd.normal { "[c", bang = true }
+              return
+            end
+            require("gitsigns").nav_hunk "prev"
+          end,
+          desc = "Previous git hunk",
+        },
+        ["<M-]>"] = {
+          function()
+            if vim.wo.diff then
+              vim.cmd.normal { "]c", bang = true }
+              return
+            end
+            require("gitsigns").nav_hunk "next"
+          end,
+          desc = "Next git hunk",
+        },
 
         ["<M-1>"] = { "<cmd>tabn 1<cr>", desc = "goto tabn 1" },
         ["<M-2>"] = { "<cmd>tabn 2<cr>", desc = "goto tabn 2" },

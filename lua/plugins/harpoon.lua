@@ -19,8 +19,6 @@ return {
         end,
         desc = "harpoon quick menu",
       },
-      { "<M-[>", function() require("harpoon"):list():prev() end, desc = "Goto previous mark" },
-      { "<M-]>", function() require("harpoon"):list():next() end, desc = "Goto next mark" },
       { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "harpoon to file 1" },
       { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "harpoon to file 2" },
       { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "harpoon to file 3" },
