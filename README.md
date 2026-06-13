@@ -401,23 +401,35 @@ Diffview 视图中可用：
 
 ### 书签
 
-使用 `xmark.nvim` 管理书签和书签列表。
+使用 `xmark.nvim` 默认快捷键管理书签和书签列表。
 
 - `<Leader>mm`：添加或更新当前书签
 - `<Leader>mt`：切换当前书签状态
 - `<Leader>md`：删除当前书签
 - `<Leader>mc`：编辑当前书签说明
+- `<Leader>mg`：跳到当前书签列表记录的当前书签
+- `<Leader>ms`：把当前行设为当前书签列表的当前书签
 - `<Leader>mp`：跳到上一个书签
 - `<Leader>mn`：跳到下一个书签
 - `<Leader>mP`：跳到第一个书签
 - `<Leader>mN`：跳到最后一个书签
 - `<Leader>mf`：选择并跳转书签
+- `<Leader>mi`：弹出输入框先输入 JSON 路径，再可选输入列表名；导入后会新建并切换到该书签列表
+- `<Leader>mo`：弹出输入框输入导出路径；默认文件名是当前书签列表名加 `.json`
+- `<Leader>mq`：把当前书签列表载入 quickfix
 - `<Leader>ml`：切换书签列表
 - `<Leader>ma`：新建书签列表
 - `<Leader>mr`：重命名当前书签列表
 - `<Leader>me`：编辑当前书签列表顺序
+- `<M-?>`：跳到当前书签列表记录的当前书签
 - `<M-{>`：跳到上一个书签
 - `<M-}>`：跳到下一个书签
+
+导入导出补充：
+
+- `:XmarkImport path.json [list_name]`：命令行导入方式；始终新建列表并导入；如果带了 `list_name` 就优先使用这个名字
+- `:XmarkExport path.json`：命令行导出方式；导出当前活动书签列表
+- 这两个命令都支持带空格的带引号路径
 
 ### 本地快捷操作
 
