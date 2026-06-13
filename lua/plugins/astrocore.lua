@@ -13,8 +13,6 @@ local default_shellxquote = is_windows and "" or vim.o.shellxquote
 ---@type LazySpec
 return {
   "AstroNvim/astrocore",
-  version = false,
-  branch = "v3",
   ---@type AstroCoreOpts
   opts = {
     treesitter = {

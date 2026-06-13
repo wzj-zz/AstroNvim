@@ -8,7 +8,7 @@ if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
 
 ---@type LazySpec
 return {
-  { "AstroNvim/astrocommunity", branch = "v6" },
+  "AstroNvim/astrocommunity",
 
   { import = "astrocommunity.pack.lua" },
 
