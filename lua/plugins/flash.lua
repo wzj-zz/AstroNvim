@@ -28,28 +28,39 @@ return {
 
     keys = {
       {
-        "s",
-        mode = { "n", "x", "o" },
-        function() require("flash").jump() end,
-        desc = "Flash",
-      },
-      {
         "S",
         mode = { "n", "o", "x" },
         function() require("flash").treesitter() end,
         desc = "Flash Treesitter",
       },
       {
-        "r",
-        mode = "o",
-        function() require("flash").remote() end,
-        desc = "Remote Flash",
-      },
-      {
         "R",
         mode = { "o", "x" },
         function() require("flash").treesitter_search() end,
         desc = "Treesitter Search",
+      },
+    },
+  },
+  {
+    "wzj-zz/flash-zh.nvim",
+
+    dependencies = { "folke/flash.nvim" },
+
+    opts = {},
+    config = function(_, opts) require("flash_zh").setup(opts) end,
+
+    keys = {
+      {
+        "s",
+        mode = { "n", "x" },
+        function() require("flash_zh").jump() end,
+        desc = "Flash Zh",
+      },
+      {
+        "r",
+        mode = "o",
+        function() require("flash_zh").remote() end,
+        desc = "Remote Flash Zh",
       },
     },
   },
