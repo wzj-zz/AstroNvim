@@ -31,6 +31,20 @@ local function jump_snapshot_marker(forward)
   if vim.fn.search(pattern, flags) == 0 then vim.notify("No more snapshot markers", vim.log.levels.INFO) end
 end
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "opencode_output",
+  callback = function(event)
+    vim.keymap.set("n", "<M-j>", function() jump_snapshot_marker(true) end, {
+      buffer = event.buf,
+      desc = "Next snapshot marker",
+    })
+    vim.keymap.set("n", "<M-k>", function() jump_snapshot_marker(false) end, {
+      buffer = event.buf,
+      desc = "Prev snapshot marker",
+    })
+  end,
+})
+
 return {
   {
     "sudo-tee/opencode.nvim",
@@ -122,8 +136,6 @@ return {
           ["<C-p>"] = { "prev_message", desc = "Prev message" },
           ["<Tab>"] = { "toggle_pane", mode = { "n", "i" }, desc = "Toggle pane" },
           ["i"] = { "focus_input", mode = { "n" }, desc = "Focus input" },
-          ["<M-j>"] = { function() jump_snapshot_marker(true) end, desc = "Next snapshot marker" },
-          ["<M-k>"] = { function() jump_snapshot_marker(false) end, desc = "Prev snapshot marker" },
           ["gr"] = { "references", mode = { "n" }, desc = "References" },
           ["a"] = { "permission", { "accept" }, mode = { "n" }, desc = "Accept once" },
           ["A"] = { "permission", { "accept_all" }, mode = { "n" }, desc = "Accept all" },
