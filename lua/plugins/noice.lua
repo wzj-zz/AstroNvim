@@ -62,6 +62,13 @@ return {
           opts = { skip = true },
         },
         {
+          filter = {
+            event = "msg_show",
+            find = "Error calling custom%.emit_events%.finished listener: Vim:E976",
+          },
+          opts = { skip = true },
+        },
+        {
           filter = { event = "notify", find = "Sort order: ascending" },
           opts = { skip = true },
         },
