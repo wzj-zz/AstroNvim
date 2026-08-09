@@ -1,3 +1,25 @@
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "gitgraph",
+  callback = function(event)
+    vim.keymap.set("n", "<M-q>", function()
+      local current = vim.api.nvim_get_current_buf()
+      local previous = vim.fn.bufnr "#"
+
+      if previous > 0 and previous ~= current and vim.api.nvim_buf_is_valid(previous) then
+        vim.api.nvim_set_current_buf(previous)
+      else
+        vim.cmd "enew"
+      end
+
+      vim.api.nvim_buf_delete(current, { force = true })
+    end, {
+      buffer = event.buf,
+      silent = true,
+      desc = "Close GitGraph",
+    })
+  end,
+})
+
 return {
   "isakbm/gitgraph.nvim",
   lazy = true,
