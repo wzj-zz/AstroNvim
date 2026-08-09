@@ -64,7 +64,14 @@ return {
         {
           filter = {
             event = "msg_show",
-            find = "Error calling custom%.emit_events%.finished listener: Vim:E976",
+            find = "E976: Using a Blob as a String",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "notify",
+            find = "E976: Using a Blob as a String",
           },
           opts = { skip = true },
         },
