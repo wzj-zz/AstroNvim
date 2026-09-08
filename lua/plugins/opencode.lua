@@ -34,11 +34,11 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "opencode_output",
   callback = function(event)
-    vim.keymap.set("n", "<M-j>", function() jump_snapshot_marker(true) end, {
+    vim.keymap.set("n", "<M-N>", function() jump_snapshot_marker(true) end, {
       buffer = event.buf,
       desc = "Next snapshot marker",
     })
-    vim.keymap.set("n", "<M-k>", function() jump_snapshot_marker(false) end, {
+    vim.keymap.set("n", "<M-P>", function() jump_snapshot_marker(false) end, {
       buffer = event.buf,
       desc = "Prev snapshot marker",
     })
@@ -95,16 +95,17 @@ return {
         input_window = {
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
           ["<C-r>"] = { "rename_session", mode = { "n", "i" }, desc = "Rename session" },
-          ["<C-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
-          ["<C-j>"] = {
+          ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
+          ["<M-j>"] = {
             "navigate_session_tree",
             { "sibling", "picker" },
             mode = { "n", "i" },
             desc = "Sibling sessions",
           },
-          ["<C-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
+          ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
           ["<C-a>"] = { "select_session", mode = { "n", "i" }, desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = { "n", "i" }, desc = "MCP picker" },
+          ["<M-s>"] = { "skills", mode = { "n", "i" }, desc = "Skills picker" },
           ["<C-z>"] = { "toggle_zoom", mode = { "n", "i" }, desc = "Toggle window zoom" },
           ["<C-x>"] = { "configure_provider", mode = { "n", "i" }, desc = "Provider/model" },
           ["<C-e>"] = { "configure_variant", mode = { "n", "i" }, desc = "Variant picker" },
@@ -127,6 +128,14 @@ return {
           ["<C-r>"] = { "rename_session", mode = "n", desc = "Rename session" },
           ["<C-a>"] = { "select_session", mode = "n", desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = "n", desc = "MCP picker" },
+          ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = "n", desc = "Parent session" },
+          ["<M-j>"] = {
+            "navigate_session_tree",
+            { "sibling", "picker" },
+            mode = "n",
+            desc = "Sibling sessions",
+          },
+          ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = "n", desc = "Child sessions" },
           ["<C-z>"] = { "toggle_zoom", mode = "n", desc = "Toggle window zoom" },
           ["<C-x>"] = { "configure_provider", mode = "n", desc = "Provider/model" },
           ["<C-e>"] = { "configure_variant", mode = "n", desc = "Variant picker" },
@@ -142,6 +151,8 @@ return {
           ["d"] = { "permission", { "deny" }, mode = { "n" }, desc = "Deny" },
           ["<M-t>"] = { "toggle_tool_output", mode = { "n" }, desc = "Toggle tool output" },
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n" }, desc = "Toggle reasoning output" },
+          ["<M-n>"] = { "next_user_message", mode = "n", desc = "Next user message" },
+          ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_picker = {
           rename_session = { "<C-r>" },
