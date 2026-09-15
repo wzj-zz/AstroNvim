@@ -93,6 +93,7 @@ return {
           ["<Leader>aY"] = { "add_visual_selection_inline", mode = "x", desc = "Add inline selection" },
         },
         input_window = {
+          ["<esc>"] = false,
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
           ["<C-r>"] = { "rename_session", mode = { "n", "i" }, desc = "Rename session" },
           ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
@@ -125,6 +126,7 @@ return {
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n", "i" }, desc = "Toggle reasoning output" },
         },
         output_window = {
+          ["<esc>"] = false,
           ["<C-r>"] = { "rename_session", mode = "n", desc = "Rename session" },
           ["<C-a>"] = { "select_session", mode = "n", desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = "n", desc = "MCP picker" },
