@@ -20,7 +20,10 @@ return {
     picker = { enabled = true },
     quickfile = { enabled = true },
     scope = { enabled = true },
-    scroll = { enabled = true },
+    -- Disabled: the scroll animation hijacks programmatic cursor jumps from
+    -- other plugins (e.g. opencode.nvim message navigation), turning instant
+    -- jumps into multi-second crawls. Purely cosmetic, not worth it.
+    scroll = { enabled = false },
     statuscolumn = { enabled = true },
     words = { enabled = true },
     styles = {
