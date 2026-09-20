@@ -33,6 +33,19 @@ the configuration and its documented behavior.
   matching the recent commit style; do not use unrelated generic messages. Stage
   and commit only files relevant to the requested change.
 
+## Documentation Sync
+
+- `README.md` documents user-facing behavior: keymaps, features, and external
+  tool requirements.
+- When a change adds, removes, or alters user-facing behavior (keymaps, default
+  actions, window behaviors, workflows), update `README.md` in the same task,
+  and mention the doc update in the task summary.
+- Behavior intentionally disabled (e.g. an inert key) is also worth documenting
+  when a user could plausibly expect the default behavior.
+- README conventions: section headings in English (for searchability), body
+  text in Chinese. Keep existing list formatting and grouping.
+- Internal-only refactors and invisible fixes do not require doc updates.
+
 ## Verification
 
 For configuration-only changes, at minimum check Lua syntax with a headless
