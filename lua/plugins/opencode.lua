@@ -32,8 +32,12 @@ local function jump_snapshot_marker(forward)
 end
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "opencode_output",
+  pattern = { "opencode", "opencode_output" },
   callback = function(event)
+    -- AstroNvim maps `q` to close for nofile buffers on BufWinEnter; pre-empt it
+    -- with a <Nop> so `q` stays inert in opencode windows (like the disabled <Esc>).
+    vim.keymap.set("n", "q", "<Nop>", { buffer = event.buf })
+    if event.match ~= "opencode_output" then return end
     vim.keymap.set("n", "<M-N>", function() jump_snapshot_marker(true) end, {
       buffer = event.buf,
       desc = "Next snapshot marker",
