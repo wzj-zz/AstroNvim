@@ -1,4 +1,4 @@
-## 简介
+## Introduction
 
 这是一个基于 AstroNvim 的 Neovim 配置，包含代码导航、文件搜索、搜索替换、Git、终端、会话、书签，以及一些可选扩展能力。
 
@@ -6,35 +6,35 @@
 
 - `Space` 是 `leader`
 
-## 目录
+## Contents
 
-- [安装](#安装)
-- [通用功能](#通用功能)
-  - [文件搜索与内容搜索](#文件搜索与内容搜索)
-  - [文件浏览与目录切换](#文件浏览与目录切换)
-  - [代码跳转与结构查看](#代码跳转与结构查看)
+- [Installation](#installation)
+- [General Features](#general-features)
+  - [Search](#search)
+  - [Files and Directories](#files-and-directories)
+  - [Code Navigation](#code-navigation)
   - [Cscope](#cscope)
-  - [Buffer、窗口与 Tab](#buffer窗口与-tab)
+  - [Buffers, Windows and Tabs](#buffers-windows-and-tabs)
   - [Quickfix](#quickfix)
-  - [搜索替换](#搜索替换)
+  - [Search and Replace](#search-and-replace)
   - [Git](#git)
   - [Harpoon](#harpoon)
-  - [会话管理](#会话管理)
-  - [书签](#书签)
-  - [本地快捷操作](#本地快捷操作)
-  - [终端与构建](#终端与构建)
-  - [编辑与选择](#编辑与选择)
-  - [界面](#界面)
-  - [调试](#调试)
-- [扩展功能](#扩展功能)
-  - [AI 对话](#ai-对话)
-  - [代码片段执行](#代码片段执行)
-  - [HTTP 请求](#http-请求)
-  - [Markdown 预览](#markdown-预览)
-  - [代理](#代理)
-- [VS Code 模式](#vs-code-模式)
+  - [Sessions](#sessions)
+  - [Bookmarks](#bookmarks)
+  - [Quick Actions](#quick-actions)
+  - [Terminal and Build](#terminal-and-build)
+  - [Editing and Selection](#editing-and-selection)
+  - [UI](#ui)
+  - [Debugging](#debugging)
+- [Extended Features](#extended-features)
+  - [AI Chat](#ai-chat)
+  - [Code Snippet Execution](#code-snippet-execution)
+  - [HTTP Requests](#http-requests)
+  - [Markdown Preview](#markdown-preview)
+  - [Proxy](#proxy)
+- [VS Code Mode](#vs-code-mode)
 
-## 安装
+## Installation
 
 这里提供两类安装方式：
 
@@ -121,9 +121,9 @@ rm -r ~/.local/state/nvim.bak
 rm -r ~/.cache/nvim.bak
 ```
 
-## 通用功能
+## General Features
 
-### 文件搜索与内容搜索
+### Search
 
 - `<Leader>sf`：智能查找文件
 - `<Leader>fl`：选择文件类型
@@ -153,14 +153,21 @@ rm -r ~/.cache/nvim.bak
 - `<Leader>sR`：恢复上一次 picker
 - `<Leader>su`：查看撤销历史
 
-### 文件浏览与目录切换
+Telescope 中可用：
+
+- `<M-CR>`：打开全部结果；有多选时 `<CR>` 打开所有选中项
+- 插入模式下 `<M-s>`：用 flash 标签跳到某个结果行
+
+### Files and Directories
 
 - `<Leader>o`：打开 `mini.files`
 - `<Leader>e`：打开 `Neo-tree Explorer`
 - `<Leader>se`：打开 `Snacks Explorer`
-- `<Leader>fz`：zoxide 目录列表
+- `<Leader>fz`：zoxide 目录列表（需要安装 `zoxide`）
+  - picker 内 `<C-e>` / `<C-f>` / `<C-g>` / `<C-r>`：tcd 到所选目录并打开 explorer / 文件搜索 / grep / 最近文件
+  - picker 内 `<C-w>`：tcd 到所选目录并关闭 picker
 
-### 代码跳转与结构查看
+### Code Navigation
 
 - `<M-d>`：定义
 - `<M-r>`：引用
@@ -179,13 +186,19 @@ rm -r ~/.cache/nvim.bak
 - `<M->>`：跳到下一个操作符，并选中右侧表达式
 - `<M-<>`：跳到上一个操作符，并选中左侧表达式
 - `<C-H>` / `<C-J>` / `<C-K>` / `<C-L>`：按语法树移动到左下上右节点
+- `<M-j>` / `<M-k>`：跳到下一个或上一个同缩进块
+- `<Leader>vu`：跳到当前语法上下文起点（支持计数）
+- `<M-a>`：跳到配对符（相当于 `%`）
+- `<M-e>`：跳到配对符内部（相当于 `z%`）
+- `<M-u>`：跳到配对符外层（相当于 `[%`，支持计数）
+- Operator-pending / Visual 模式下 `R`：Flash Treesitter 远程选择
 
 Namu：
 
 - `<M-f>`：当前文件符号
-- `<S-M-f>`：当前文件 ctags 符号
+- `<S-M-f>`：当前文件 ctags 符号（需要安装 `ctags`）
 - `<Leader>vx`：watchtower（LSP / Treesitter）
-- `<Leader>vn`：watchtower（ctags）
+- `<Leader>vn`：watchtower（ctags，需要安装 `ctags`）
 - `<Leader>vs`：工作区符号
 - `<Leader>vd`：诊断列表
 - `<Leader>vi`：call in
@@ -262,7 +275,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<C-c>b`：构建数据库
 - `<C-c>B`：强制重建数据库
 
-### Buffer、窗口与 Tab
+### Buffers, Windows and Tabs
 
 - `<C-z>`：当前窗口全屏或恢复原大小
 - `<M-q>`：关闭当前窗口或当前 tab
@@ -289,7 +302,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<Leader>sv`：只保留当前 quickfix 涉及文件中包含指定内容的文件，并为每个文件保留一条 quickfix 结果
 - Visual 模式下 `<Leader>vv`：只保留当前文件中位于选区行号范围内的 quickfix 结果
 
-### 搜索替换
+### Search and Replace
 
 - `<Leader>ro`：全项目搜索替换
 - `<Leader>rr`：只在当前文件搜索替换
@@ -298,6 +311,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - Visual 模式下 `<Leader>rr`：只在当前文件搜索替换，并将选中内容带入搜索
 - Visual 模式下 `<Leader>rf`：只在当前文件类型搜索替换，并将选中内容带入搜索
 - Visual 模式下 `<Leader>rv`：只在选中范围内替换
+- Neo-tree / mini.files 中 `gS`：以当前节点或目录为范围打开搜索替换
 
 ### Git
 
@@ -305,9 +319,9 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<Leader>gf`：切到当前 nvim 配置目录并在该目录打开 Neogit
 - `<Leader>gx`：切到 `xtools` 目录并在该目录打开 Neogit
 - `<Leader>gB`：切换行级 blame
-- `<Leader>gG`：查看 Git graph
-- `<Leader>gi`：查看 GitHub issues
-- `<Leader>gp`：查看 GitHub pull requests
+- `<Leader>gG`：查看 Git graph（GitGraph 窗口中 `<M-q>` 关闭）
+- `<Leader>gi`：查看 GitHub issues（需要安装 `gh`）
+- `<Leader>gp`：查看 GitHub pull requests（需要安装 `gh`）
 - `<M-[>`：跳到上一个 git hunk
 - `<M-]>`：跳到下一个 git hunk
 
@@ -387,20 +401,28 @@ Diffview 视图中可用：
 - `zo` / `zc` / `za` / `zR` / `zM`：折叠操作
 - `<C-b>` / `<C-f>`：滚动视图
 
+Diffview 提交历史面板中可用：
+
+- `g!`：打开选项面板
+- `<C-A-d>`：在 diffview 中打开光标所在条目
+- `y`：复制该条目的 commit hash
+- `L`：查看提交详情
+- `X`：恢复文件到该提交的状态
+
 ### Harpoon
 
 - `<S-M-m>`：把当前文件加入 Harpoon
 - `<M-m>`：打开 Harpoon 列表
 - `<Leader>1` 到 `<Leader>5`：跳到第 1 到第 5 个 Harpoon 文件
 
-### 会话管理
+### Sessions
 
 - `<Leader>,>`：保存当前标签页会话
 - `<Leader>,.`：加载会话
 - `<Leader>,/`：从当前会话分离
 - `<Leader>,?`：删除会话
 
-### 书签
+### Bookmarks
 
 使用 `xmark.nvim` 默认快捷键管理书签和书签列表。
 
@@ -432,7 +454,7 @@ Diffview 视图中可用：
 - `:XmarkExport path.json`：命令行导出方式；导出当前活动书签列表
 - 这两个命令都支持带空格的带引号路径
 
-### 本地快捷操作
+### Quick Actions
 
 - `<Leader>,a`：全选当前文件
 - `<Leader>,e`：把工作目录切到当前文件所在目录，聚焦 Neo-tree，并输出当前目录
@@ -441,15 +463,15 @@ Diffview 视图中可用：
 - `<Leader>,3`：复制当前文件完整路径
 - `<Leader>,c`：复制当前工作目录
 - `<Leader>,,`：把剪贴板内容当路径处理，目录则切换工作目录，文件则直接打开
-- `<Leader>,dd`：当前窗口进入 diff 模式
+- `<Leader>,dd`：当前窗口进入 diff 模式（diff 模式下 `<M-n>` / `<M-p>` 跳下一个或上一个 diff hunk）
 - `<Leader>,dc`：关闭 diff 模式
 - `<Leader>,dg`：从对侧获取变更
 - `<Leader>,dp`：把当前变更送到对侧
-- `<Leader>,hh`：切换到 hex 视图
+- `<Leader>,hh`：切换到 hex 视图（需要安装 `xxd`）
 - `<Leader>,hr`：从 hex 视图切回二进制
 - `<Leader>,ho`：以二进制方式重新打开文件
 
-### 终端与构建
+### Terminal and Build
 
 - `<M-/>`：打开或关闭系统 shell 终端，右侧半屏
 - `<Leader>,s`：打开 `xs` 终端，右侧半屏
@@ -472,17 +494,33 @@ Xmake：
 终端窗口中可用：
 
 - `Esc` 或 `jk`：退出终端输入模式
+- `<M-/>`：终端内同样可以开合 shell 终端
 - `<M-w>`：打开普通 buffer 列表
 - Terminal normal 模式下 `<C-z>`：当前窗口全屏或恢复原大小
 - `<M-q>`：关闭当前终端窗口或当前 tab
+- 注：终端模式下 `<C-l>`（清屏）已禁用
 
-### 编辑与选择
+### Editing and Selection
 
 插入模式：
 
 - `<C-s>`：保存
 - `<C-v>`：粘贴系统剪贴板
 - `<C-h>`：删除前一个单词
+- `<S-Left>` / `<S-Right>` / `<S-Up>` / `<S-Down>`：开始选择
+- `<S-Home>` / `<S-End>`：选择到行首或行尾
+- `<S-PageUp>` / `<S-PageDown>`：按页选择
+- `<C-S-Left>` / `<C-S-Right>`：按单词扩展选择
+
+Visual 模式下 `<S-方向键>` / `<C-S-Left>` / `<C-S-Right>` / `<S-PageUp>` / `<S-PageDown>`：继续扩展或收缩选择。
+
+命令模式下 `<C-v>`：粘贴系统剪贴板。
+
+语法节点选择：
+
+- `<CR>`：启动或逐层扩展语法节点选择，Visual 模式下 `<BS>` 收缩（wildfire）
+- `<Leader>vv`：切换 tshjkl 语法树选择模式
+- `<Leader>vV`：切换 tshjkl 语法树选择模式（含外层节点）
 
 结构编辑：
 
@@ -498,6 +536,12 @@ Xmake：
 - `ds`：删除包围符
 - `cs`：替换包围符
 - `cS`：替换包围符并换行
+
+中文分词移动（jieba.vim）：
+
+- `w` / `e` / `b` / `ge`：按 jieba 分词粒度在中文中移动
+- `iw` / `aw`：按分词选择中文词（`ysiw` 等 surround 操作也按分词生效）
+- `W` / `E` / `B` / `gE`：保持原生语义，连续中文视为一个整体（`E` 直达整段中文末尾）
 
 Treesitter 文本对象：
 
@@ -546,7 +590,7 @@ Treesitter 文本对象交换：
 - `<S-M-j>` / `<S-M-k>`：在当前高亮分组内切换下一个或上一个结果
 - `<S-M-h>` / `<S-M-l>`：跳到离光标最近的下一个或上一个高亮，不限分组
 
-### 界面
+### UI
 
 - `<Leader>sz`：切换 Zen 模式
 - `<Leader>sx`：切换 dim 模式
@@ -555,18 +599,21 @@ Treesitter 文本对象交换：
 - `<Leader>s.`：选择 scratch buffer
 - `<Leader>uT`：切换透明背景
 - `<Leader>u(`：切换当前 buffer 的 rainbow delimiters
+- `<Leader>ux`：切换 treesitter-context（默认关闭）
+- `<Leader>L`：清除搜索高亮
+- 注：AstroNvim 默认的 `<Leader>q`（退出）和 `<Leader>h`（清除高亮）已禁用
 
-### 调试
+### Debugging
 
 - `<Leader>de`：添加调试表达式
 - `<Leader>dE`：添加调试表达式
 - `<Leader>du`：切换调试 UI
 
-## 扩展功能
+## Extended Features
 
 下面这些功能依赖额外工具或属于扩展用途。
 
-### AI 对话
+### AI Chat
 
 需要安装 `opencode`：
 
@@ -628,7 +675,25 @@ AI 输出窗口中可用：
 - `<M-r>`：切换 reasoning output
 - `<C-n>` / `<C-p>`：上下切换消息
 
-### 代码片段执行
+AI 输入与输出窗口中均可用的会话标签页（多 tab）键位：
+
+- `<M-c>`：新建会话标签页
+- `<M-f>`：会话标签选择器
+- `<M-,>` / `<M-.>`：上一个或下一个会话标签页
+- `<M-1>` ~ `<M-4>`：直达第 1~4 个会话标签页
+- `<M-x>`：关闭当前会话标签页
+
+注意：AI 窗口中 `q` 和 `<Esc>` 均已禁用，不会关闭窗口；开关窗口请用 `<M-o>`。
+
+AI 各选择器内部可用：
+
+- 会话选择器：`<C-r>` 重命名、`<C-d>` 删除、`<C-s>` 新建、`<C-t>` 在新标签页打开、`<C-f>` fork、`<C-g>` 切换项目或全局范围
+- 时间线选择器：`<C-u>` undo、`<C-f>` fork
+- 历史选择器：`<C-d>` 删除条目、`<C-x>` 清空
+- 模型选择器：`<C-f>` 收藏
+- MCP 选择器：`<C-t>` 切换连接
+
+### Code Snippet Execution
 
 需要安装 `xt` / `xs`：
 
@@ -637,17 +702,17 @@ AI 输出窗口中可用：
 - `<Leader>,v`：执行并弹出结果窗口
 - `<Leader>,z`：把当前文件或选中内容当 Lua 执行
 
-### HTTP 请求
+### HTTP Requests
 
 编辑 `.http` 或 `.rest` 文件时可使用 `kulala.nvim`：
 
 - `<Leader>h`：HTTP 请求相关命令入口
 
-### Markdown 预览
+### Markdown Preview
 
 - `<C-M-m>`：预览当前 Markdown
 
-### 代理
+### Proxy
 
 - `<Leader>P`：切换代理
 
@@ -656,7 +721,7 @@ AI 输出窗口中可用：
 - 开启：`http://127.0.0.1:1080`
 - 关闭：只保留 `NO_PROXY`
 
-## VS Code 模式
+## VS Code Mode
 
 如果在 VS Code 中通过扩展使用这套配置，会自动切换成兼容模式。
 
