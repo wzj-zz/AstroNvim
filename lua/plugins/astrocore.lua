@@ -206,6 +206,10 @@ return {
           function() xtools.toggle_shell() end,
           desc = "ToggleTerm shell",
         },
+        ["<M-O>"] = {
+          function() xtools.toggle_agent_panel() end,
+          desc = "Toggle agent terminal",
+        },
         ["<Leader>,s"] = {
           function()
             xtools.new_term_cmd_vertical {
@@ -305,6 +309,10 @@ return {
         ["<M-/>"] = {
           [[<C-\><C-n><cmd>lua require("xtools").toggle_shell()<cr>]],
           desc = "ToggleTerm shell",
+        },
+        ["<M-O>"] = {
+          [[<C-\><C-n><cmd>lua require("xtools").toggle_agent_panel()<cr>]],
+          desc = "Toggle agent terminal",
         },
         ["<M-q>"] = {
           "<cmd>close<cr>",

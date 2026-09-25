@@ -474,6 +474,7 @@ Diffview 提交历史面板中可用：
 ### Terminal and Build
 
 - `<M-/>`：打开或关闭系统 shell 终端，右侧半屏
+- `<M-O>`：toggle agent 终端（`codex` / `opencode2` / `pi` / `omp`），右侧半屏
 - `<Leader>,s`：打开 `xs` 终端，右侧半屏
 - `<Leader>xf`：打开 `mf-runner`
 - `<Leader>xx`：编辑 `mf-runner` 的 Makefile
@@ -494,7 +495,7 @@ Xmake：
 终端窗口中可用：
 
 - `Esc` 或 `jk`：退出终端输入模式
-- `<M-/>`：终端内同样可以开合 shell 终端
+- `<M-/>`：终端内同样可以 toggle shell 终端
 - `<M-w>`：打开普通 buffer 列表
 - Terminal normal 模式下 `<C-z>`：当前窗口全屏或恢复原大小
 - `<M-q>`：关闭当前终端窗口或当前 tab
