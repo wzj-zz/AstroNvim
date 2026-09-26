@@ -335,10 +335,39 @@ local agent_cmds = {
   omp = "omp",
 }
 
+local wt_exe
+
+local function get_wt_exe()
+  if wt_exe then return wt_exe end
+  wt_exe = "wt.exe"
+  local scoop = vim.env.SCOOP
+  local sep = "\\"
+  if not scoop and vim.fn.has "wsl" == 1 then
+    sep = "/"
+    local out = vim.fn.system({ "cmd.exe", "/c", "echo %SCOOP%" }):gsub("%s", "")
+    if out ~= "" and not out:find "%%" then
+      scoop = vim.fn.system({ "wslpath", "-u", out }):gsub("%s", "")
+    end
+  end
+  if scoop then
+    local shim = scoop .. sep .. "shims" .. sep .. "wt.exe"
+    if vim.fn.filereadable(shim) == 1 then wt_exe = shim end
+  end
+  return wt_exe
+end
+
 function M.open_agent_wt(name)
-  -- 在当前 Windows Terminal 窗口开 split pane 运行 agent（仅 Windows）
+  -- 在当前 Windows Terminal 窗口开 split pane 运行 agent；
+  -- Windows 直跑，WSL 下通过 wsl.exe 回到本发行版执行（agent 用 WSL 里的那份）
   local cmd = agent_cmds[name] or name
-  local argv = { "wt.exe", "split-pane", "-d", M.cwd() }
+  local argv = { get_wt_exe(), "split-pane" }
+  if vim.fn.has "wsl" == 1 then
+    vim.list_extend(argv, { "wsl.exe" })
+    if vim.env.WSL_DISTRO_NAME then vim.list_extend(argv, { "-d", vim.env.WSL_DISTRO_NAME }) end
+    vim.list_extend(argv, { "--cd", M.cwd(), "--" })
+  else
+    vim.list_extend(argv, { "-d", M.cwd() })
+  end
   vim.list_extend(argv, vim.split(cmd, " "))
   vim.fn.jobstart(argv, { detach = true })
 end

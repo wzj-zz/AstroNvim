@@ -462,8 +462,8 @@ Diffview 提交历史面板中可用：
 - `<Leader>,2`：复制当前文件名
 - `<Leader>,3`：复制当前文件完整路径
 - `<Leader>,c`：复制当前工作目录
-- `<Leader>,w`：在 Windows Terminal 当前窗口开 split pane 运行 codex（仅 Windows）
-- `<Leader>,W`：同上，但弹出 agent 选择器（`codex` / `opencode2` / `pi` / `omp`）（仅 Windows）
+- `<Leader>,w`：在 Windows Terminal 当前窗口开 split pane 运行 codex（Windows / WSL）
+- `<Leader>,W`：同上，但弹出 agent 选择器
 - `<Leader>,,`：把剪贴板内容当路径处理，目录则切换工作目录，文件则直接打开
 - `<Leader>,dd`：当前窗口进入 diff 模式（diff 模式下 `<M-n>` / `<M-p>` 跳下一个或上一个 diff hunk）
 - `<Leader>,dc`：关闭 diff 模式
@@ -477,7 +477,7 @@ Diffview 提交历史面板中可用：
 ### Terminal and Build
 
 - `<M-/>`：打开或关闭系统 shell 终端，右侧半屏
-- `<M-O>`：toggle agent 终端（`codex` / `opencode2` / `pi` / `omp`），右侧半屏
+- `<M-O>`：toggle agent 终端，右侧半屏
 - `<Leader>,s`：打开 `xs` 终端，右侧半屏
 - `<Leader>xf`：打开 `mf-runner`
 - `<Leader>xx`：编辑 `mf-runner` 的 Makefile

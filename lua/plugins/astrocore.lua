@@ -231,11 +231,11 @@ return {
           function() xtools.yank_clip(xtools.cwd()) end,
           desc = "Yank CWD",
         },
-        ["<Leader>,w"] = is_windows and {
+        ["<Leader>,w"] = (is_windows or vim.fn.has "wsl" == 1) and {
           function() xtools.open_agent_wt "codex" end,
           desc = "Open codex in Windows Terminal split pane",
         } or nil,
-        ["<Leader>,W"] = is_windows and {
+        ["<Leader>,W"] = (is_windows or vim.fn.has "wsl" == 1) and {
           function() xtools.select_agent_wt() end,
           desc = "Select agent in Windows Terminal split pane",
         } or nil,
