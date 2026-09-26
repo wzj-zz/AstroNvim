@@ -231,6 +231,14 @@ return {
           function() xtools.yank_clip(xtools.cwd()) end,
           desc = "Yank CWD",
         },
+        ["<Leader>,w"] = is_windows and {
+          function() xtools.open_agent_wt "codex" end,
+          desc = "Open codex in Windows Terminal split pane",
+        } or nil,
+        ["<Leader>,W"] = is_windows and {
+          function() xtools.select_agent_wt() end,
+          desc = "Select agent in Windows Terminal split pane",
+        } or nil,
         ["<Leader>,,"] = {
           function()
             xtools.adjust_path_from_clip()

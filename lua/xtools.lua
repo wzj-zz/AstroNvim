@@ -335,6 +335,26 @@ local agent_cmds = {
   omp = "omp",
 }
 
+function M.open_agent_wt(name)
+  -- 在当前 Windows Terminal 窗口开 split pane 运行 agent（仅 Windows）
+  local cmd = agent_cmds[name] or name
+  local argv = { "wt.exe", "split-pane", "-d", M.cwd() }
+  vim.list_extend(argv, vim.split(cmd, " "))
+  vim.fn.jobstart(argv, { detach = true })
+end
+
+local function pick_agent(on_pick)
+  local names = vim.tbl_keys(agent_cmds)
+  table.sort(names)
+  vim.ui.select(names, { prompt = "Select agent" }, function(name)
+    if name then on_pick(name) end
+  end)
+end
+
+function M.select_agent() pick_agent(M.toggle_agent) end
+
+function M.select_agent_wt() pick_agent(M.open_agent_wt) end
+
 function M.toggle_agent(name)
   local vertical_term_width_ratio = 0.5
   local cmd = agent_cmds[name] or name
@@ -364,14 +384,6 @@ function M.toggle_agent(name)
   term:toggle(math.floor(vim.o.columns * vertical_term_width_ratio), "vertical")
   vim.schedule(function()
     if vim.bo.buftype == "terminal" then vim.cmd.startinsert() end
-  end)
-end
-
-function M.select_agent()
-  local names = vim.tbl_keys(agent_cmds)
-  table.sort(names)
-  vim.ui.select(names, { prompt = "Select agent" }, function(name)
-    if name then M.toggle_agent(name) end
   end)
 end
 

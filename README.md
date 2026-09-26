@@ -462,6 +462,8 @@ Diffview 提交历史面板中可用：
 - `<Leader>,2`：复制当前文件名
 - `<Leader>,3`：复制当前文件完整路径
 - `<Leader>,c`：复制当前工作目录
+- `<Leader>,w`：在 Windows Terminal 当前窗口开 split pane 运行 codex（仅 Windows）
+- `<Leader>,W`：同上，但弹出 agent 选择器（`codex` / `opencode2` / `pi` / `omp`）（仅 Windows）
 - `<Leader>,,`：把剪贴板内容当路径处理，目录则切换工作目录，文件则直接打开
 - `<Leader>,dd`：当前窗口进入 diff 模式（diff 模式下 `<M-n>` / `<M-p>` 跳下一个或上一个 diff hunk）
 - `<Leader>,dc`：关闭 diff 模式
