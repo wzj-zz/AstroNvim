@@ -114,6 +114,24 @@ return {
   config = function(_, opts)
     require("codediff").setup(opts)
 
+    -- workaround: NeogitOrg/neogit#2008（neogit 还在传旧的 session schema，上游修复后可删除）
+    local ok_view, view = pcall(require, "codediff.ui.view")
+    if ok_view and view.create then
+      local original_create = view.create
+      local path = require "codediff.core.path"
+      view.create = function(session_config, filetype, on_ready)
+        if session_config.mode == "explorer" and not session_config.panel then
+          session_config.panel = {
+            name = "explorer",
+            data = session_config.explorer_data or {},
+          }
+          session_config.original = session_config.original or path.empty()
+          session_config.modified = session_config.modified or path.empty()
+        end
+        return original_create(session_config, filetype, on_ready)
+      end
+    end
+
     local ok, welcome_window = pcall(require, "codediff.ui.view.welcome_window")
     if not ok or not welcome_window then return end
 
