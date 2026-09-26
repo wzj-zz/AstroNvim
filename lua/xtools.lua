@@ -12,6 +12,37 @@ function M.get_clip() return vim.fn.getreg "+" end
 
 function M.set_clip(data) return vim.fn.setreg("+", data) end
 
+function M.show_bottom(text)
+  -- 底部一行面板，每次调用覆盖显示最新内容，光标留在面板里按 q 关闭
+  local buf
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.bo[b].filetype == "xtools_bottom" then
+      buf = b
+      break
+    end
+  end
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then
+    buf = vim.api.nvim_create_buf(false, true)
+    vim.bo[buf].filetype = "xtools_bottom"
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true })
+  end
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n"))
+
+  for _, w in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_buf(w) == buf then
+      vim.api.nvim_set_current_win(w)
+      return
+    end
+  end
+  vim.cmd "botright 1split"
+  vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), buf)
+end
+
+function M.yank_clip(data)
+  M.set_clip(data)
+  M.show_bottom(data)
+end
+
 function M.isdir(path) return vim.fn.isdirectory(path) == 1 end
 
 function M.isfile(path) return vim.fn.filereadable(path) == 1 end

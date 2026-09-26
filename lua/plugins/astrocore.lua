@@ -222,17 +222,13 @@ return {
         },
 
         ["<Leader>,1"] = {
-          '<cmd>let @+ = expand("%:p:h")<cr><cmd>echo expand("%:p:h")<cr>',
+          function() xtools.yank_clip(vim.fn.expand "%:p:h") end,
           desc = "Yank directory path",
         },
-        ["<Leader>,2"] = { '<cmd>let @+ = expand("%:t")<cr><cmd>echo expand("%:t")<cr>', desc = "Yank filename" },
-        ["<Leader>,3"] = { '<cmd>let @+ = expand("%:p")<cr><cmd>echo expand("%:p")<cr>', desc = "Yank full path" },
+        ["<Leader>,2"] = { function() xtools.yank_clip(vim.fn.expand "%:t") end, desc = "Yank filename" },
+        ["<Leader>,3"] = { function() xtools.yank_clip(vim.fn.expand "%:p") end, desc = "Yank full path" },
         ["<Leader>,c"] = {
-          function()
-            local work_dir = xtools.cwd()
-            xtools.set_clip(work_dir)
-            print(work_dir)
-          end,
+          function() xtools.yank_clip(xtools.cwd()) end,
           desc = "Yank CWD",
         },
         ["<Leader>,,"] = {
