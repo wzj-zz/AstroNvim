@@ -344,7 +344,7 @@ local function get_wt_exe()
   local sep = "\\"
   if not scoop and vim.fn.has "wsl" == 1 then
     sep = "/"
-    local out = vim.fn.system({ "cmd.exe", "/c", "echo %SCOOP%" }):gsub("%s", "")
+    local out = vim.fn.system({ "/mnt/c/Windows/System32/cmd.exe", "/c", "echo %SCOOP%" }):gsub("%s", "")
     if out ~= "" and not out:find "%%" then
       scoop = vim.fn.system({ "wslpath", "-u", out }):gsub("%s", "")
     end
