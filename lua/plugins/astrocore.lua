@@ -168,6 +168,7 @@ return {
         ["<Leader>,dc"] = { "<cmd>diffoff!<cr>", desc = "diffoff" },
         ["<Leader>,dg"] = { "<cmd>diffget<cr>", desc = "diffget" },
         ["<Leader>,dp"] = { "<cmd>diffput<cr>", desc = "diffput" },
+        ["<Leader>,r"] = { "<cmd>%s/\\r//ge<cr>", desc = "Remove all ^M (CR)" },
         ["<Leader>,x"] = {
           function()
             local code = xtools.get_buf_content()

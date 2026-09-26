@@ -467,6 +467,7 @@ Diffview 提交历史面板中可用：
 - `<Leader>,dc`：关闭 diff 模式
 - `<Leader>,dg`：从对侧获取变更
 - `<Leader>,dp`：把当前变更送到对侧
+- `<Leader>,r`：删除当前 buffer 里所有的 `^M`（`\r`）
 - `<Leader>,hh`：切换到 hex 视图（需要安装 `xxd`）
 - `<Leader>,hr`：从 hex 视图切回二进制
 - `<Leader>,ho`：以二进制方式重新打开文件
