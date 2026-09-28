@@ -356,10 +356,39 @@ local function get_wt_exe()
   return wt_exe
 end
 
+-- 后台服务固定使用 49374 端口；被其他环境的实例占用时改用私有 server 启动
+local function opencode2_cmd()
+  local uv = vim.uv or vim.loop
+  local state_file = (vim.env.XDG_STATE_HOME or vim.fn.expand "~" .. "/.local/state") .. "/opencode/service.json"
+  local f = io.open(state_file, "r")
+  if f then
+    local ok, state = pcall(vim.json.decode, f:read "*a")
+    f:close()
+    if ok and type(state) == "table" and type(state.pid) == "number" and uv.kill(state.pid, 0) ~= nil then
+      return agent_cmds.opencode2
+    end
+  end
+  local occupied, done = false, false
+  local tcp = uv.new_tcp()
+  local timer = uv.new_timer()
+  local function finish(result)
+    if done then return end
+    done = true
+    occupied = result
+    timer:stop()
+    timer:close()
+    tcp:close()
+  end
+  timer:start(500, 0, function() finish(true) end)
+  tcp:connect("127.0.0.1", 49374, function(err) finish(err == nil) end)
+  vim.wait(600, function() return done end, 10)
+  return occupied and agent_cmds.opencode2 .. " --standalone" or agent_cmds.opencode2
+end
+
 function M.open_agent_wt(name)
   -- 在当前 Windows Terminal 窗口开 split pane 运行 agent；
   -- Windows 直跑，WSL 下通过 wsl.exe 回到本发行版执行（agent 用 WSL 里的那份）
-  local cmd = agent_cmds[name] or name
+  local cmd = name == "opencode2" and opencode2_cmd() or agent_cmds[name] or name
   local argv = { get_wt_exe(), "split-pane" }
   if vim.fn.has "wsl" == 1 then
     vim.list_extend(argv, { "wsl.exe" })

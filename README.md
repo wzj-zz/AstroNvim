@@ -476,7 +476,7 @@ Diffview 提交历史面板中可用：
 ### Terminal and Build
 
 - `<M-/>`：打开或关闭系统 shell 终端，右侧半屏
-- `<M-O>`：在 Windows Terminal 当前窗口开 split pane 运行 opencode2（Windows / WSL）
+- `<M-O>`：在 Windows Terminal 当前窗口开 split pane 运行 opencode2（Windows / WSL）；后台服务端口被其他环境的实例占用时自动改用 `--standalone` 启动
 - `<Leader>,s`：打开 `xs` 终端，右侧半屏
 - `<Leader>xf`：打开 `mf-runner`
 - `<Leader>xx`：编辑 `mf-runner` 的 Makefile
