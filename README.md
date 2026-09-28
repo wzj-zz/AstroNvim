@@ -29,7 +29,6 @@
 - [Extended Features](#extended-features)
   - [AI Chat](#ai-chat)
   - [Code Snippet Execution](#code-snippet-execution)
-  - [HTTP Requests](#http-requests)
   - [Markdown Preview](#markdown-preview)
   - [Proxy](#proxy)
 - [VS Code Mode](#vs-code-mode)
@@ -708,12 +707,6 @@ AI 各选择器内部可用：
 - `<Leader>,f`：在浮动终端运行当前文件或选中代码；输出窗口默认 normal 模式，按 `q` 可关闭
 - `<Leader>,v`：执行并弹出结果窗口
 - `<Leader>,z`：把当前文件或选中内容当 Lua 执行
-
-### HTTP Requests
-
-编辑 `.http` 或 `.rest` 文件时可使用 `kulala.nvim`：
-
-- `<Leader>h`：HTTP 请求相关命令入口
 
 ### Markdown Preview
 
