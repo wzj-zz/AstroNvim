@@ -212,6 +212,62 @@ local function goto_file_change(forward)
   update_user_msg_badge(win)
 end
 
+-- OSC 9;4 progress indicator on the terminal tab (Windows Terminal, WezTerm, ...).
+-- Tracks opencode activity from this Neovim instance: spinner while a request is
+-- in flight, paused at 50% while a permission is pending, cleared when done.
+-- Writes to Neovim's own stdout, which is connected to the real terminal.
+local term_progress = (function()
+  local osc = {
+    busy = "\027]9;4;3;0\007",
+    idle = "\027]9;4;0;0\007",
+    waiting = "\027]9;4;4;50\007",
+  }
+  local busy, waiting = {}, {}
+  local current = "idle"
+
+  local function refresh()
+    local state
+    if next(waiting) then
+      state = "waiting"
+    elseif next(busy) then
+      state = "busy"
+    else
+      state = "idle"
+    end
+    if state == current then return end
+    current = state
+    io.stdout:write(osc[state])
+    io.stdout:flush()
+  end
+
+  return {
+    on_submit = function(session_id)
+      if session_id then busy[session_id] = true end
+      refresh()
+    end,
+    on_done = function(session)
+      local id = session and session.id
+      if id then
+        busy[id] = nil
+        waiting[id] = nil
+      end
+      refresh()
+    end,
+    on_permission = function(session)
+      local id = session and session.id
+      if id then waiting[id] = true end
+      refresh()
+    end,
+    clear = function()
+      current = "idle"
+      io.stdout:write(osc.idle)
+      io.stdout:flush()
+    end,
+  }
+end)()
+
+vim.api.nvim_create_autocmd("VimLeavePre", { callback = term_progress.clear })
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "opencode", "opencode_output" },
   callback = function(event)
@@ -484,6 +540,11 @@ return {
         default_agent = nil,
         instructions = nil,
       },
+      -- Terminal tab progress (term_progress above)
+      hooks = {
+        on_done_thinking = function(session) term_progress.on_done(session) end,
+        on_permission_requested = function(session) term_progress.on_permission(session) end,
+      },
       debug = {
         enabled = false,
         capture_streamed_events = false,
@@ -500,6 +561,15 @@ return {
     },
     config = function(_, opts)
       require("opencode").setup(opts)
+
+      -- Terminal tab progress (term_progress above): mark the session busy on
+      -- submit.
+      local v2_operations = require("opencode.protocols.v2.operations")
+      local submit_with_progress = v2_operations.submit
+      v2_operations.submit = function(connection, session_id, ...)
+        term_progress.on_submit(session_id)
+        return submit_with_progress(connection, session_id, ...)
+      end
 
       local ok, wk = pcall(require, "which-key")
       if ok then wk.add {
