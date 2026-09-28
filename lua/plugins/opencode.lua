@@ -24,6 +24,70 @@ local function restart_opencode_server()
   vim.notify("Restarted opencode server", vim.log.levels.INFO)
 end
 
+-- Position "[i/n]" badge on the USER message block the cursor is in, shown
+-- on the message's first *body* line (the header/separator lines are occupied
+-- by markdown-rule rendering, where right-aligned virtual text gets clobbered).
+-- Cheap: one O(n) pass over ctx.entries + one extmark. Note the total counts
+-- only *cached* user messages; for very long sessions with paged history it
+-- may under-count until older pages are pulled.
+local user_msg_badge_ns = vim.api.nvim_create_namespace("opencode_user_msg_badge")
+
+-- Badge color: default-link to `Special` (usually purple/violet, matching the
+-- user-message accent bar). Override to taste, e.g.:
+--   vim.api.nvim_set_hl(0, "OpencodeUserMsgBadge", { fg = "#e5c07b" })
+local function set_user_msg_badge_hl()
+  vim.api.nvim_set_hl(0, "OpencodeUserMsgBadge", { link = "Special", default = true })
+end
+set_user_msg_badge_hl()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = set_user_msg_badge_hl })
+
+---First body line (1-indexed) of a rendered message: the first content part's
+---start line, falling back to the message's own header line. The message-level
+---range covers only the separator/header; the body lives in part ranges.
+---Part lookup must go through ctx.content_key: v2 text/reasoning parts have
+---no `id` and are registered as "<message_id>:content:<index>".
+---@return integer? # 1-indexed line, nil if the message isn't rendered
+local function message_body_line(ctx, m)
+  local r = ctx.render_state:get_message(m.id)
+  if not r or not r.line_start then return nil end
+  for i, part in ipairs(m.content or {}) do
+    if part.kind ~= "step_start" and part.kind ~= "step_finish" then
+      local p = ctx.render_state:get_part(ctx.content_key(m, i))
+      if p and p.line_start then return p.line_start + 1 end
+    end
+  end
+  return r.line_start + 1
+end
+
+local function update_user_msg_badge(win)
+  local state = require("opencode.state")
+  local buf = state.windows and state.windows.output_buf
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then return end
+  local ctx = require("opencode.ui.renderer.ctx").current()
+
+  -- The current block owner is the last message (any kind) whose header is
+  -- at/above the cursor; show the badge only when that owner is a USER message.
+  local line = vim.api.nvim_win_get_cursor(win)[1]
+  local total, owner_index, owner = 0, nil, nil
+  for _, m in ipairs(ctx.entries) do
+    if m.kind == "user" then total = total + 1 end
+    local r = ctx.render_state:get_message(m.id)
+    if r and r.line_start and r.line_start + 1 <= line then
+      owner = m
+      owner_index = m.kind == "user" and total or nil
+    end
+  end
+
+  vim.api.nvim_buf_clear_namespace(buf, user_msg_badge_ns, 0, -1)
+  local body = owner and message_body_line(ctx, owner)
+  if owner_index and body then
+    vim.api.nvim_buf_set_extmark(buf, user_msg_badge_ns, body - 1, 0, {
+      virt_text = { { ("[%d/%d]"):format(owner_index, total), "OpencodeUserMsgBadge" } },
+      virt_text_pos = "right_align",
+    })
+  end
+end
+
 local function jump_snapshot_marker(forward)
   local flags = forward and "W" or "bW"
   local pattern = "\\V**:: Created Snapshot**"
@@ -45,6 +109,19 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "<M-P>", function() jump_snapshot_marker(false) end, {
       buffer = event.buf,
       desc = "Prev snapshot marker",
+    })
+    -- Keep the [i/n] badge in sync with the cursor: show it whenever the
+    -- cursor sits on a USER message, hide it elsewhere. Recomputing on
+    -- CursorMoved (instead of only clearing) also survives Neovim firing
+    -- CursorMoved *after* the jump keymap returns (main-loop dispatch),
+    -- which would otherwise wipe a badge set inside the mapping.
+    vim.api.nvim_create_autocmd("CursorMoved", {
+      buffer = event.buf,
+      callback = function()
+        local st = require("opencode.state")
+        local w = st.windows and st.windows.output_win
+        if w and vim.api.nvim_win_is_valid(w) then update_user_msg_badge(w) end
+      end,
     })
   end,
 })
