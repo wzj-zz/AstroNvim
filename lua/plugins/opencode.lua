@@ -88,6 +88,91 @@ local function update_user_msg_badge(win)
   end
 end
 
+---Expand unrendered history above the cursor (for `prev`-direction jumps).
+---Lazy render shows only a tail window, so older entries may be unrendered.
+---Expansion only prepends older messages, so it can only help jumping up.
+---Guarded against re-expanding when everything cached is already rendered:
+---a full re-render per extra press at the true top churns the buffer and lets
+---scheduled follow-up work (markdown re-render, history pulls) move the
+---cursor, which then eats the next few jump presses.
+---@param ctx table render context
+---@param current_line0 integer 0-indexed cursor line
+---@return integer? base0 # 0-indexed line to re-search from, nil when nothing expanded
+local function expand_unrendered_above(ctx, current_line0)
+  local first = ctx.entries[1]
+  local first_rendered = first and ctx.render_state:get_message(first.id)
+  local has_unrendered_above = ctx.lazy_render_count ~= nil
+    and ctx.lazy_render_count ~= math.huge
+    and first ~= nil
+    and not (first_rendered and first_rendered.line_start)
+  if not has_unrendered_above then return nil end
+
+  -- Remember the block under the cursor; expansion prepends lines.
+  local anchor_id
+  for _, m in ipairs(ctx.entries) do
+    local r = ctx.render_state:get_message(m.id)
+    if r and r.line_start and r.line_start <= current_line0 then anchor_id = m.id end
+  end
+
+  local renderer = require("opencode.ui.renderer")
+  ctx.lazy_render_count = math.huge
+  renderer.render_from_cache(ctx, { scroll_to_bottom = false })
+  if not anchor_id then return 0 end
+  local r = renderer.get_rendered_message(anchor_id)
+  return (r and r.line_start) or 0
+end
+
+-- Workaround for opencode.nvim v2: the built-in next/prev_user_message actions
+-- call renderer.load_all_messages(), whose async history-load callback
+-- unconditionally lands the cursor at line 1, undoing the jump. Navigate via
+-- the render state directly instead, without triggering the history pull.
+--
+-- Navigation and landing use the message's first *body* line, not its header:
+-- the header line is a markdown-rule separator (rendered via conceal/virt
+-- text), and landing there both looks wrong and breaks the badge display.
+-- Searching by body line also keeps consecutive presses stall-free: from a
+-- message's body, M-p goes straight to the previous USER message.
+local function goto_user_message(forward)
+  local state = require("opencode.state")
+  require("opencode.ui.ui").focus_output()
+  local win = state.windows and state.windows.output_win
+  if not win or not vim.api.nvim_win_is_valid(win) then return end
+  local ctx = require("opencode.ui.renderer.ctx").current()
+
+  local current_line = vim.api.nvim_win_get_cursor(win)[1]
+
+  local function find_target(from_line)
+    local best
+    for _, m in ipairs(ctx.entries) do
+      if m.kind == "user" then
+        local bl = message_body_line(ctx, m)
+        if bl then
+          if forward and bl > from_line and (not best or bl < best) then
+            best = bl
+          elseif not forward and bl < from_line and (not best or bl > best) then
+            best = bl
+          end
+        end
+      end
+    end
+    return best
+  end
+
+  local target = find_target(current_line)
+
+  if not target and not forward then
+    local base0 = expand_unrendered_above(ctx, current_line - 1)
+    if base0 then target = find_target(base0 + 1) end
+  end
+
+  if target then
+    pcall(vim.api.nvim_win_call, win, function() vim.cmd([[noau normal! m']]) end)
+    vim.api.nvim_win_set_cursor(win, { target, 0 })
+  end
+  -- At the boundary: stay put silently (no notification).
+  update_user_msg_badge(win)
+end
+
 local function jump_snapshot_marker(forward)
   local flags = forward and "W" or "bW"
   local pattern = "\\V**:: Created Snapshot**"
@@ -102,6 +187,18 @@ vim.api.nvim_create_autocmd("FileType", {
     -- with a <Nop> so `q` stays inert in opencode windows (like the disabled <Esc>).
     vim.keymap.set("n", "q", "<Nop>", { buffer = event.buf })
     if event.match ~= "opencode_output" then return end
+    -- Registered here instead of the plugin's output_window keymap table:
+    -- the plugin re-processes function-valued window keymaps on every
+    -- windows-store update with preserve_existing, and once the mapping
+    -- exists it spams "No action found for keymap" warnings (plugin bug).
+    vim.keymap.set("n", "<M-n>", function() goto_user_message(true) end, {
+      buffer = event.buf,
+      desc = "Next user message",
+    })
+    vim.keymap.set("n", "<M-p>", function() goto_user_message(false) end, {
+      buffer = event.buf,
+      desc = "Prev user message",
+    })
     vim.keymap.set("n", "<M-N>", function() jump_snapshot_marker(true) end, {
       buffer = event.buf,
       desc = "Next snapshot marker",
@@ -253,8 +350,6 @@ return {
           ["d"] = { "permission", { "deny" }, mode = { "n" }, desc = "Deny" },
           ["<M-t>"] = { "toggle_tool_output", mode = { "n" }, desc = "Toggle tool output" },
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n" }, desc = "Toggle reasoning output" },
-          ["<M-n>"] = { "next_user_message", mode = "n", desc = "Next user message" },
-          ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_picker = {
           rename_session = { "<C-r>" },
