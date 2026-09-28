@@ -173,11 +173,43 @@ local function goto_user_message(forward)
   update_user_msg_badge(win)
 end
 
-local function jump_snapshot_marker(forward)
-  local flags = forward and "W" or "bW"
-  local pattern = "\\V**:: Created Snapshot**"
+-- Jump between file-change blocks: the tool blocks the plugin offers a [D]iff
+-- action for (edit with changes / apply_patch / patch; `write` produces no
+-- diff action). Uses the render state's registered diff_toggle_file actions
+-- rather than text search -- display_line is the 0-indexed tool header line.
+local function goto_file_change(forward)
+  local state = require("opencode.state")
+  require("opencode.ui.ui").focus_output()
+  local win = state.windows and state.windows.output_win
+  if not win or not vim.api.nvim_win_is_valid(win) then return end
+  local ctx = require("opencode.ui.renderer.ctx").current()
 
-  if vim.fn.search(pattern, flags) == 0 then vim.notify("No more snapshot markers", vim.log.levels.INFO) end
+  local function find_target(from_line0)
+    local best
+    for _, action in ipairs(ctx.render_state:get_all_actions()) do
+      if action.type == "diff_toggle_file" and action.display_line then
+        local l = action.display_line
+        if forward and l > from_line0 and (not best or l < best) then best = l end
+        if not forward and l < from_line0 and (not best or l > best) then best = l end
+      end
+    end
+    return best
+  end
+
+  local current_line0 = vim.api.nvim_win_get_cursor(win)[1] - 1
+  local target = find_target(current_line0)
+
+  if not target and not forward then
+    local base0 = expand_unrendered_above(ctx, current_line0)
+    if base0 then target = find_target(base0) end
+  end
+
+  if target then
+    pcall(vim.api.nvim_win_call, win, function() vim.cmd([[noau normal! m']]) end)
+    vim.api.nvim_win_set_cursor(win, { target + 1, 0 })
+  end
+  -- At the boundary: stay put silently (no notification).
+  update_user_msg_badge(win)
 end
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -199,13 +231,13 @@ vim.api.nvim_create_autocmd("FileType", {
       buffer = event.buf,
       desc = "Prev user message",
     })
-    vim.keymap.set("n", "<M-N>", function() jump_snapshot_marker(true) end, {
+    vim.keymap.set("n", "<M-N>", function() goto_file_change(true) end, {
       buffer = event.buf,
-      desc = "Next snapshot marker",
+      desc = "Next file change",
     })
-    vim.keymap.set("n", "<M-P>", function() jump_snapshot_marker(false) end, {
+    vim.keymap.set("n", "<M-P>", function() goto_file_change(false) end, {
       buffer = event.buf,
-      desc = "Prev snapshot marker",
+      desc = "Prev file change",
     })
     -- Keep the [i/n] badge in sync with the cursor: show it whenever the
     -- cursor sits on a USER message, hide it elsewhere. Recomputing on
