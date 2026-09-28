@@ -372,75 +372,15 @@ function M.open_agent_wt(name)
   vim.fn.jobstart(argv, { detach = true })
 end
 
-local function pick_agent(on_pick)
-  local names = vim.tbl_keys(agent_cmds)
+local function pick_agent(on_pick, exclude)
+  local names = vim.tbl_filter(function(name) return not vim.tbl_contains(exclude or {}, name) end, vim.tbl_keys(agent_cmds))
   table.sort(names)
   vim.ui.select(names, { prompt = "Select agent" }, function(name)
     if name then on_pick(name) end
   end)
 end
 
-function M.select_agent() pick_agent(M.toggle_agent) end
-
-function M.select_agent_wt() pick_agent(M.open_agent_wt) end
-
-function M.toggle_agent(name)
-  local vertical_term_width_ratio = 0.5
-  local cmd = agent_cmds[name] or name
-  local term
-  for _, existing in ipairs(require("toggleterm.terminal").get_all()) do
-    if existing.display_name == name then
-      term = existing
-      break
-    end
-  end
-  if not term then
-    term = require("toggleterm.terminal").Terminal:new {
-      cmd = cmd,
-      dir = M.cwd(),
-      display_name = name,
-      on_open = function(t)
-        vim.keymap.set(
-          "t",
-          "<C-z>",
-          [[<C-\><C-n><cmd>lua require("xtools").toggle_window_zoom()<cr><cmd>startinsert<cr>]],
-          { buffer = t.bufnr, silent = true, desc = "Toggle window zoom" }
-        )
-      end,
-    }
-  end
-
-  term:toggle(math.floor(vim.o.columns * vertical_term_width_ratio), "vertical")
-  vim.schedule(function()
-    if vim.bo.buftype == "terminal" then vim.cmd.startinsert() end
-  end)
-end
-
-function M.toggle_agent_panel()
-  local terminal_mod = require "toggleterm.terminal"
-  if vim.bo.buftype == "terminal" then
-    local bufnr = vim.api.nvim_get_current_buf()
-    for _, term in ipairs(terminal_mod.get_all()) do
-      if term.bufnr == bufnr then
-        term:toggle()
-        return
-      end
-    end
-    pcall(vim.cmd.close)
-    return
-  end
-
-  local agents = {}
-  for _, term in ipairs(terminal_mod.get_all()) do
-    if agent_cmds[term.display_name] then table.insert(agents, term) end
-  end
-
-  if #agents == 1 then
-    M.toggle_agent(agents[1].display_name)
-  else
-    M.select_agent()
-  end
-end
+function M.select_agent_wt() pick_agent(M.open_agent_wt, { "opencode2" }) end
 
 function M.toggle_shell()
   -- 复用同一个交互 shell 终端，并始终跟随当前 `vim.o.shell`。
