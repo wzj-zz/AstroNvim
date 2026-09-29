@@ -334,7 +334,7 @@ Codediff 视图中可用：
 - `<M-q>`：关闭 Codediff
 - `<Leader>b`：切换文件列表
 - `<Leader>e`：聚焦文件列表
-- `<M-n>` / `<M-p>`：下一个或上一个 diff hunk
+- `<M-n>` / `<M-p>`：下一个或上一个 diff hunk（窗口右侧短暂显示 `[当前/总数]` 位置）
 - `<Tab>` / `<S-Tab>`：下一个或上一个文件
 - `gf`：在新 tab 打开当前文件
 - `g<C-x>`：切换布局

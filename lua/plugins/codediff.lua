@@ -114,6 +114,43 @@ return {
   config = function(_, opts)
     require("codediff").setup(opts)
 
+    -- hunk 位置指示：codediff 在 <M-n>/<M-p> 时 echo "Hunk x of y"，但 noice 对瞬时
+    -- echo 只能弹窗（会堆叠）。这里直接监听该消息，画成右侧虚拟文本（原地替换、自动消失）。
+    -- noice.lua 中已 skip 这三条消息，避免重复显示。
+    local ns = vim.api.nvim_create_namespace "codediff_hunk_pos"
+    local state = { buf = nil, timer = vim.uv.new_timer() }
+
+    local function clear()
+      state.timer:stop()
+      if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+        pcall(vim.api.nvim_buf_del_extmark, state.buf, ns, 1)
+      end
+      state.buf = nil
+    end
+
+    vim.ui_attach(ns, { ext_messages = true }, function(event, _, content)
+      if event ~= "msg_show" then return end
+      local chunks = {}
+      for _, chunk in ipairs(content) do
+        chunks[#chunks + 1] = chunk[2]
+      end
+      local text = table.concat(chunks)
+      local n, total = text:match "^Hunk (%d+) of (%d+)$"
+      if not n then n, total = text:match "^%a+ hunk %((%d+) of (%d+)%)$" end
+      if not n then return end
+      vim.schedule(function()
+        clear()
+        local buf = vim.api.nvim_get_current_buf()
+        vim.api.nvim_buf_set_extmark(buf, ns, vim.api.nvim_win_get_cursor(0)[1] - 1, 0, {
+          id = 1,
+          virt_text = { { ("[%d/%d]"):format(n, total), "DiagnosticVirtualTextInfo" } },
+          virt_text_pos = "right_align",
+        })
+        state.buf = buf
+        state.timer:start(800, 0, vim.schedule_wrap(clear))
+      end)
+    end)
+
     -- workaround: NeogitOrg/neogit#2008（neogit 还在传旧的 session schema，上游修复后可删除）
     local ok_view, view = pcall(require, "codediff.ui.view")
     if ok_view and view.create then

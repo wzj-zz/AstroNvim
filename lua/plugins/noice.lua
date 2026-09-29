@@ -75,6 +75,10 @@ return {
           },
           opts = { skip = true },
         },
+        -- codediff hunk position: rendered as virtual text by codediff.lua, silence the echo
+        { filter = { event = "msg_show", find = "^First hunk %(" }, opts = { skip = true } },
+        { filter = { event = "msg_show", find = "^Last hunk %(" }, opts = { skip = true } },
+        { filter = { event = "msg_show", find = "^Hunk %d+ of %d+" }, opts = { skip = true } },
         {
           filter = { event = "notify", find = "Sort order: ascending" },
           opts = { skip = true },
