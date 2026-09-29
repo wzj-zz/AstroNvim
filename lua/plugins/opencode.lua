@@ -122,57 +122,6 @@ local function expand_unrendered_above(ctx, current_line0)
   return (r and r.line_start) or 0
 end
 
--- Workaround for opencode.nvim v2: the built-in next/prev_user_message actions
--- call renderer.load_all_messages(), whose async history-load callback
--- unconditionally lands the cursor at line 1, undoing the jump. Navigate via
--- the render state directly instead, without triggering the history pull.
---
--- Navigation and landing use the message's first *body* line, not its header:
--- the header line is a markdown-rule separator (rendered via conceal/virt
--- text), and landing there both looks wrong and breaks the badge display.
--- Searching by body line also keeps consecutive presses stall-free: from a
--- message's body, M-p goes straight to the previous USER message.
-local function goto_user_message(forward)
-  local state = require("opencode.state")
-  require("opencode.ui.ui").focus_output()
-  local win = state.windows and state.windows.output_win
-  if not win or not vim.api.nvim_win_is_valid(win) then return end
-  local ctx = require("opencode.ui.renderer.ctx").current()
-
-  local current_line = vim.api.nvim_win_get_cursor(win)[1]
-
-  local function find_target(from_line)
-    local best
-    for _, m in ipairs(ctx.entries) do
-      if m.kind == "user" then
-        local bl = message_body_line(ctx, m)
-        if bl then
-          if forward and bl > from_line and (not best or bl < best) then
-            best = bl
-          elseif not forward and bl < from_line and (not best or bl > best) then
-            best = bl
-          end
-        end
-      end
-    end
-    return best
-  end
-
-  local target = find_target(current_line)
-
-  if not target and not forward then
-    local base0 = expand_unrendered_above(ctx, current_line - 1)
-    if base0 then target = find_target(base0 + 1) end
-  end
-
-  if target then
-    pcall(vim.api.nvim_win_call, win, function() vim.cmd([[noau normal! m']]) end)
-    vim.api.nvim_win_set_cursor(win, { target, 0 })
-  end
-  -- At the boundary: stay put silently (no notification).
-  update_user_msg_badge(win)
-end
-
 -- Jump between file-change blocks: the tool blocks the plugin offers a [D]iff
 -- action for (edit with changes / apply_patch / patch; `write` produces no
 -- diff action). Uses the render state's registered diff_toggle_file actions
@@ -279,14 +228,6 @@ vim.api.nvim_create_autocmd("FileType", {
     -- the plugin re-processes function-valued window keymaps on every
     -- windows-store update with preserve_existing, and once the mapping
     -- exists it spams "No action found for keymap" warnings (plugin bug).
-    vim.keymap.set("n", "<M-n>", function() goto_user_message(true) end, {
-      buffer = event.buf,
-      desc = "Next user message",
-    })
-    vim.keymap.set("n", "<M-p>", function() goto_user_message(false) end, {
-      buffer = event.buf,
-      desc = "Prev user message",
-    })
     vim.keymap.set("n", "<M-N>", function() goto_file_change(true) end, {
       buffer = event.buf,
       desc = "Next file change",
@@ -438,6 +379,8 @@ return {
           ["d"] = { "permission", { "deny" }, mode = { "n" }, desc = "Deny" },
           ["<M-t>"] = { "toggle_tool_output", mode = { "n" }, desc = "Toggle tool output" },
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n" }, desc = "Toggle reasoning output" },
+          ["<M-n>"] = { "next_user_message", mode = "n", desc = "Next user message" },
+          ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_picker = {
           rename_session = { "<C-r>" },

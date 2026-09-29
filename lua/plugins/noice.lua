@@ -84,6 +84,14 @@ return {
           opts = { skip = true },
         },
         {
+          filter = { event = "notify", find = "^No next user message$" },
+          opts = { skip = true },
+        }, -- skip opencode user-message boundary
+        {
+          filter = { event = "notify", find = "^No previous user message$" },
+          opts = { skip = true },
+        },
+        {
           filter = { event = "notify", find = "Copied node:" },
           opts = { skip = true },
         },
