@@ -261,6 +261,7 @@ return {
       { "<M-o>", mode = { "n", "i" }, desc = "Toggle windows" },
       { "<Leader>a/", mode = { "n", "x" }, desc = "Quick chat" },
       { "<Leader>aa", desc = "Session picker" },
+      { "<Leader>ad", desc = "Diff review" },
       { "<Leader>ax", desc = "Restart server" },
       { "<Leader>ay", mode = "x", desc = "Add selection" },
       { "<Leader>aY", mode = "x", desc = "Add inline selection" },
@@ -296,6 +297,7 @@ return {
           ["<M-o>"] = { "toggle", mode = { "n", "i" }, desc = "Toggle windows" },
           ["<Leader>a/"] = { "quick_chat", mode = { "n", "x" }, desc = "Quick chat" },
           ["<Leader>aa"] = { "select_session", desc = "Session picker" },
+          ["<Leader>ad"] = { "diff_open", desc = "Diff review" },
           ["<Leader>ax"] = { restart_opencode_server, desc = "Restart server" },
           ["<Leader>ay"] = { "add_visual_selection", mode = "x", desc = "Add selection" },
           ["<Leader>aY"] = { "add_visual_selection_inline", mode = "x", desc = "Add inline selection" },
@@ -381,6 +383,24 @@ return {
           ["<M-r>"] = { "toggle_reasoning_output", mode = { "n" }, desc = "Toggle reasoning output" },
           ["<M-n>"] = { "next_user_message", mode = "n", desc = "Next user message" },
           ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
+        },
+        session_diff = {
+          -- <M-q> closes the whole diff view from anywhere inside it, matching
+          -- the global "close window" habit. In the list/preview scopes the
+          -- default `q` does the same; in the messages/help floats `q` only
+          -- closes the float, so <M-q> is deliberately the heavier action.
+          list = {
+            ["<M-q>"] = { "close", desc = "Close diff view" },
+          },
+          preview = {
+            ["<M-q>"] = { "close", desc = "Close diff view" },
+          },
+          messages = {
+            ["<M-q>"] = { "close", desc = "Close diff view" },
+          },
+          help = {
+            ["<M-q>"] = { "close", desc = "Close diff view" },
+          },
         },
         session_picker = {
           rename_session = { "<C-r>" },
