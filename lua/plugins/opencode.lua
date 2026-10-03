@@ -24,17 +24,12 @@ local function restart_opencode_server()
   vim.notify("Restarted opencode server", vim.log.levels.INFO)
 end
 
--- Position "[i/n]" badge on the USER message block the cursor is in, shown
--- on the message's first *body* line (the header/separator lines are occupied
--- by markdown-rule rendering, where right-aligned virtual text gets clobbered).
--- Cheap: one O(n) pass over ctx.entries + one extmark. Note the total counts
--- only *cached* user messages; for very long sessions with paged history it
--- may under-count until older pages are pulled.
+-- Position "[i/n]" badge on the USER message block the cursor is in, on the
+-- message's first *body* line (header lines get clobbered by markdown-rule
+-- rendering). The total counts only *cached* user messages.
 local user_msg_badge_ns = vim.api.nvim_create_namespace("opencode_user_msg_badge")
 
--- Badge color: default-link to `Special` (usually purple/violet, matching the
--- user-message accent bar). Override to taste, e.g.:
---   vim.api.nvim_set_hl(0, "OpencodeUserMsgBadge", { fg = "#e5c07b" })
+-- Badge color: default-link to `Special`; override `OpencodeUserMsgBadge` to taste.
 local function set_user_msg_badge_hl()
   vim.api.nvim_set_hl(0, "OpencodeUserMsgBadge", { link = "Special", default = true })
 end
@@ -122,10 +117,8 @@ local function expand_unrendered_above(ctx, current_line0)
   return (r and r.line_start) or 0
 end
 
--- Jump between file-change blocks: the tool blocks the plugin offers a [D]iff
--- action for (edit with changes / apply_patch / patch; `write` produces no
--- diff action). Uses the render state's registered diff_toggle_file actions
--- rather than text search -- display_line is the 0-indexed tool header line.
+-- Jump between file-change blocks (edit / apply_patch / patch; `write` has no
+-- diff action) via the render state's registered actions, not text search.
 local function goto_file_change(forward)
   local state = require("opencode.state")
   require("opencode.ui.ui").focus_output()
@@ -161,10 +154,8 @@ local function goto_file_change(forward)
   update_user_msg_badge(win)
 end
 
--- OSC 9;4 progress indicator on the terminal tab (Windows Terminal, WezTerm, ...).
--- Tracks opencode activity from this Neovim instance: spinner while a request is
--- in flight, paused at 50% while a permission is pending, cleared when done.
--- Writes to Neovim's own stdout, which is connected to the real terminal.
+-- OSC 9;4 progress indicator on the terminal tab: spinner while busy, paused
+-- at 50% on pending permission, cleared when done. Written to Neovim's stdout.
 local term_progress = (function()
   local osc = {
     busy = "\027]9;4;3;0\007",
@@ -240,11 +231,8 @@ vim.api.nvim_create_autocmd("FileType", {
       buffer = event.buf,
       desc = "Prev file change",
     })
-    -- Keep the [i/n] badge in sync with the cursor: show it whenever the
-    -- cursor sits on a USER message, hide it elsewhere. Recomputing on
-    -- CursorMoved (instead of only clearing) also survives Neovim firing
-    -- CursorMoved *after* the jump keymap returns (main-loop dispatch),
-    -- which would otherwise wipe a badge set inside the mapping.
+    -- Recompute the [i/n] badge on CursorMoved: survives Neovim firing
+    -- CursorMoved after the jump keymap returns, which would wipe the badge.
     vim.api.nvim_create_autocmd("CursorMoved", {
       buffer = event.buf,
       callback = function()
@@ -387,8 +375,7 @@ return {
           ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_diff = {
-          -- <M-q> closes the whole diff view from any scope; in floats `q`
-          -- only closes the float, so <M-q> is deliberately heavier.
+          -- <M-q>: close the whole diff view from any scope (`q` in floats only closes the float).
           list = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
           },
