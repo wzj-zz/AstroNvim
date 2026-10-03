@@ -29,5 +29,15 @@ vim.api.nvim_create_autocmd("OptionSet", {
   end,
 })
 
+-- OptionSet does not fire when 'diff' is toggled from inside another autocmd
+-- callback (e.g. opencode.nvim session-diff: file switching is driven by the
+-- list window's CursorMoved, so diffthis runs in a nested context). WinEnter
+-- covers that gap: focusing a diff-mode window ensures the mappings exist.
+vim.api.nvim_create_autocmd("WinEnter", {
+  callback = function()
+    if vim.wo.diff then setup_diff_mappings() end
+  end,
+})
+
 if vim.wo.diff then setup_diff_mappings() end
 return {}
