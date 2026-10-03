@@ -44,6 +44,11 @@ the configuration and its documented behavior.
   when a user could plausibly expect the default behavior.
 - README conventions: section headings in English (for searchability), body
   text in Chinese. Keep existing list formatting and grouping.
+- Describe semantics over mechanism: document what a keymap or feature does and
+  when it applies, not how it is wired. Rationale and plumbing (plugin bugs,
+  workarounds, autocmd wiring) belong in code comments next to the config.
+  A mechanism detail may appear only when needed to explain user-visible
+  behavior, e.g. a known limitation.
 - Internal-only refactors and invisible fixes do not require doc updates.
 
 ## Verification
