@@ -169,6 +169,73 @@ return {
       end
     end
 
+    -- gf（open_in_prev_tab）上游默认把文件塞进前一个标签页的窗口，会替换掉
+    -- 那里的 buffer（比如从 Neogit 进入时，Neogit 界面就被顶替了）。这里改为
+    -- 在 CodeDiff 之后新开标签页，形成 Neogit → CodeDiff → 文件 的层级，
+    -- 关闭时逐层回退。逻辑照抄上游 ui/view/actions/panes.lua，仅改标签页处理；
+    -- 上游重构该文件后需同步。close_on_open_in_prev_tab 在此实现下无意义，被忽略。
+    local ok_panes, panes = pcall(require, "codediff.ui.view.actions.panes")
+    if ok_panes and panes.open_in_prev_tab then
+      local lifecycle = require "codediff.ui.lifecycle"
+      panes.open_in_prev_tab = function(ctx)
+        local session = lifecycle.get_session(ctx.tabpage)
+        if not session then return end
+
+        local current_buf = vim.api.nvim_get_current_buf()
+        local side = nil
+        if current_buf == ctx.original_bufnr then
+          side = "original"
+        elseif current_buf == ctx.modified_bufnr then
+          side = "modified"
+        end
+
+        local explorer = lifecycle.get_panel_view(ctx.tabpage)
+        local is_explorer_buf = explorer and explorer.bufnr and current_buf == explorer.bufnr
+
+        -- 只处理 diff 和 explorer buffer，history/result 静默忽略
+        if not side and not is_explorer_buf then return end
+
+        local is_virtual = (side == "original" and lifecycle.is_original_virtual(ctx.tabpage))
+          or (side == "modified" and lifecycle.is_modified_virtual(ctx.tabpage))
+
+        local target_file
+        if is_explorer_buf then
+          local node = explorer.tree and explorer.tree:get_node()
+          local data = node and node.data
+          if not data or data.type == "group" or data.type == "directory" or not data.path or data.path == "" then
+            return
+          end
+          local git_root = data.git_root or explorer.git_root or session.git_root
+          if not git_root or git_root == "" then return end
+          target_file = vim.fs.joinpath(git_root, data.path)
+        elseif is_virtual then
+          local original, modified = lifecycle.get_paths(ctx.tabpage)
+          local ref = side == "original" and original or modified
+          if not ref or ref.absolute == "" then
+            vim.notify("Buffer has no associated file path", vim.log.levels.WARN)
+            return
+          end
+          target_file = ref.absolute
+        else
+          target_file = vim.api.nvim_buf_get_name(current_buf)
+          if target_file == "" then
+            vim.notify("Buffer has no name; cannot open in new tab", vim.log.levels.WARN)
+            return
+          end
+        end
+
+        local cursor = side and vim.api.nvim_win_get_cursor(0) or nil
+
+        local ok, err = pcall(vim.cmd, "tabedit " .. vim.fn.fnameescape(target_file))
+        if not ok then
+          vim.notify("Failed to open file in new tab: " .. err, vim.log.levels.ERROR)
+          return
+        end
+
+        if cursor then pcall(vim.api.nvim_win_set_cursor, 0, cursor) end
+      end
+    end
+
     local ok, welcome_window = pcall(require, "codediff.ui.view.welcome_window")
     if not ok or not welcome_window then return end
 
