@@ -223,6 +223,10 @@ vim.api.nvim_create_autocmd("FileType", {
     -- AstroNvim maps `q` to close for nofile buffers on BufWinEnter; pre-empt it
     -- with a <Nop> so `q` stays inert in opencode windows (like the disabled <Esc>).
     vim.keymap.set("n", "q", "<Nop>", { buffer = event.buf })
+    -- <M-f>: toggle current-file context (= "Current File" in the `#` picker; config default off).
+    vim.keymap.set({ "n", "i" }, "<M-f>", function()
+      require("opencode.context").toggle_context("current_file")
+    end, { buffer = event.buf, desc = "Toggle current file context" })
     if event.match ~= "opencode_output" then return end
     -- Registered here instead of the plugin's output_window keymap table:
     -- the plugin re-processes function-valued window keymaps on every
@@ -316,7 +320,6 @@ return {
           ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
           ["<M-,>"] = { "prev_session_tab", mode = { "n", "i" }, desc = "Prev session tab" },
           ["<M-.>"] = { "next_session_tab", mode = { "n", "i" }, desc = "Next session tab" },
-          ["<M-f>"] = { "select_session_tab", mode = { "n", "i" }, desc = "Session tab picker" },
           ["<M-1>"] = { "select_session_tab", { 1 }, mode = { "n", "i" }, desc = "Session tab 1" },
           ["<M-2>"] = { "select_session_tab", { 2 }, mode = { "n", "i" }, desc = "Session tab 2" },
           ["<M-3>"] = { "select_session_tab", { 3 }, mode = { "n", "i" }, desc = "Session tab 3" },
@@ -359,7 +362,6 @@ return {
           ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = "n", desc = "Child sessions" },
           ["<M-,>"] = { "prev_session_tab", mode = "n", desc = "Prev session tab" },
           ["<M-.>"] = { "next_session_tab", mode = "n", desc = "Next session tab" },
-          ["<M-f>"] = { "select_session_tab", mode = "n", desc = "Session tab picker" },
           ["<M-1>"] = { "select_session_tab", { 1 }, mode = "n", desc = "Session tab 1" },
           ["<M-2>"] = { "select_session_tab", { 2 }, mode = "n", desc = "Session tab 2" },
           ["<M-3>"] = { "select_session_tab", { 3 }, mode = "n", desc = "Session tab 3" },
@@ -385,10 +387,8 @@ return {
           ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_diff = {
-          -- <M-q> closes the whole diff view from anywhere inside it, matching
-          -- the global "close window" habit. In the list/preview scopes the
-          -- default `q` does the same; in the messages/help floats `q` only
-          -- closes the float, so <M-q> is deliberately the heavier action.
+          -- <M-q> closes the whole diff view from any scope; in floats `q`
+          -- only closes the float, so <M-q> is deliberately heavier.
           list = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
           },
@@ -470,7 +470,7 @@ return {
       context = {
         enabled = true,
         current_file = {
-          enabled = true,
+          enabled = false,
           show_full_path = true,
         },
         files = {
