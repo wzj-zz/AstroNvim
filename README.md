@@ -626,7 +626,6 @@ Treesitter 文本对象交换：
 - `<Leader>a/`：快速对话
 - Visual 模式下 `<Leader>ay`：把选中代码作为上下文项加入会话，不直接插入输入框
 - Visual 模式下 `<Leader>aY`：把选中代码以内联代码块形式直接插入输入框
-- `<Leader>ax`：重启 opencode 服务
 
 AI 输入窗口中可用：
 

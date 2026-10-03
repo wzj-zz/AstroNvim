@@ -1,29 +1,3 @@
-local function restart_opencode_server()
-  local ok_state, state = pcall(require, "opencode.state")
-  local ok_server_job, server_job = pcall(require, "opencode.server_job")
-
-  if not ok_state or not ok_server_job then
-    vim.notify("opencode.nvim internals unavailable", vim.log.levels.WARN)
-    return
-  end
-
-  local ok, err = pcall(function()
-    if state.opencode_server and type(state.opencode_server.shutdown) == "function" then
-      state.opencode_server:shutdown():wait(3000)
-    end
-
-    state.jobs.clear_server()
-    state.jobs.set_server(server_job.ensure_server():wait(5000))
-  end)
-
-  if not ok then
-    vim.notify("Failed to restart opencode server: " .. tostring(err), vim.log.levels.ERROR)
-    return
-  end
-
-  vim.notify("Restarted opencode server", vim.log.levels.INFO)
-end
-
 -- Position "[i/n]" badge on the USER message block the cursor is in, on the
 -- message's first *body* line (header lines get clobbered by markdown-rule
 -- rendering). The total counts only *cached* user messages.
@@ -254,7 +228,6 @@ return {
       { "<Leader>a/", mode = { "n", "x" }, desc = "Quick chat" },
       { "<Leader>aa", desc = "Session picker" },
       { "<Leader>ad", desc = "Diff review" },
-      { "<Leader>ax", desc = "Restart server" },
       { "<Leader>ay", mode = "x", desc = "Add selection" },
       { "<Leader>aY", mode = "x", desc = "Add inline selection" },
     },
@@ -290,7 +263,6 @@ return {
           ["<Leader>a/"] = { "quick_chat", mode = { "n", "x" }, desc = "Quick chat" },
           ["<Leader>aa"] = { "select_session", desc = "Session picker" },
           ["<Leader>ad"] = { "diff_open", desc = "Diff review" },
-          ["<Leader>ax"] = { restart_opencode_server, desc = "Restart server" },
           ["<Leader>ay"] = { "add_visual_selection", mode = "x", desc = "Add selection" },
           ["<Leader>aY"] = { "add_visual_selection_inline", mode = "x", desc = "Add inline selection" },
         },
