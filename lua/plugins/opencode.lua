@@ -493,6 +493,19 @@ return {
         return submit_with_progress(connection, session_id, ...)
       end
 
+      -- Worktree picker on <M-w> inside opencode input/output windows (backend:
+      -- lua/opencode_worktree.lua). Buffer-local via FileType so it doesn't clash
+      -- with the global <M-w> Find Buffer mapping in lua/plugins/snacks.lua.
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "opencode", "opencode_output" },
+        callback = function(ev)
+          vim.keymap.set({ "n", "i" }, "<M-w>", function() require("opencode_worktree").pick() end, {
+            buffer = ev.buf,
+            desc = "Worktrees",
+          })
+        end,
+      })
+
       local ok, wk = pcall(require, "which-key")
       if ok then wk.add {
         { "<Leader>a", group = "Opencode" },
