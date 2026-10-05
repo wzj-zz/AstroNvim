@@ -506,6 +506,74 @@ return {
         end,
       })
 
+      -- Show the session's working directory on the footer's left side as
+      -- "repo:branch". Delete this wrapper once upstream supports it natively:
+      -- https://github.com/sudo-tee/opencode.nvim/issues/512
+      -- The label steals its width from the middle padding so the right side
+      -- (model/mode) is never clipped; branch is resolved async and cached.
+      local cwd_label_cache = {}
+      local footer
+      local function cwd_label(cwd)
+        if cwd_label_cache[cwd] then return cwd_label_cache[cwd] end
+        -- --git-common-dir resolves to the MAIN repo's .git even from a linked
+        -- worktree, so the label shows "mainrepo:branch" rather than the
+        -- worktree directory's own name.
+        local fallback = vim.fn.fnamemodify(cwd, ":~")
+        -- pcall: vim.system raises when cwd no longer exists (e.g. worktree
+        -- deleted while a tab still points at it).
+        local spawned = pcall(vim.system, {
+          "git", "rev-parse", "--path-format=absolute", "--git-common-dir", "--abbrev-ref", "HEAD",
+        }, { cwd = cwd, text = true }, function(res)
+          vim.schedule(function()
+            local label
+            if res.code == 0 then
+              local parts = vim.split(vim.trim(res.stdout or ""), "\n", { trimempty = true })
+              if parts[1] then
+                label = vim.fs.basename(vim.fs.dirname(parts[1]))
+                if parts[2] and parts[2] ~= "HEAD" then label = label .. ":" .. parts[2] end
+              end
+            end
+            cwd_label_cache[cwd] = label or fallback
+            pcall(footer.render)
+          end)
+        end)
+        if not spawned then cwd_label_cache[cwd] = fallback end
+        return fallback
+      end
+
+      footer = require "opencode.ui.footer"
+      local orig_set_content = footer.set_content
+      footer.set_content = function(lines, highlights)
+        local ok_state, opencode_state = pcall(require, "opencode.state")
+        local cwd = ok_state and opencode_state.current_cwd
+        if cwd and lines and #lines > 0 and lines[1] ~= "" then
+          local label = cwd_label(cwd):sub(1, 30) .. " "
+          local line = lines[1]
+          -- Find a run of spaces wide enough to absorb the label's width.
+          local best_s, best_len
+          for s, e in line:gmatch "() +()" do
+            local len = e - s - 1
+            if len >= #label and (not best_len or len > best_len) then
+              best_s, best_len = s, len
+            end
+          end
+          if best_s then
+            lines = { label .. line:sub(1, best_s - 1) .. line:sub(best_s + #label) }
+            for _, h in ipairs(highlights or {}) do
+              if h.start_col < best_s then
+                h.start_col = h.start_col + #label
+                h.end_col = h.end_col + #label
+              end
+            end
+            if highlights then
+              table.insert(highlights, { group = "OpencodeHint", start_col = 0, end_col = #label })
+            end
+          end
+        end
+        return orig_set_content(lines, highlights)
+      end
+      require("opencode.state").store.subscribe("current_cwd", function() pcall(footer.render) end)
+
       local ok, wk = pcall(require, "which-key")
       if ok then wk.add {
         { "<Leader>a", group = "Opencode" },
