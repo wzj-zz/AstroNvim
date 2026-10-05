@@ -49,6 +49,8 @@ the configuration and its documented behavior.
   workarounds, autocmd wiring) belong in code comments next to the config.
   A mechanism detail may appear only when needed to explain user-visible
   behavior, e.g. a known limitation.
+- Do not document self-evident UI (things the user sees at a glance, like a
+  label shown in a footer).
 - Internal-only refactors and invisible fixes do not require doc updates.
 
 ## Verification
