@@ -7,7 +7,8 @@
 --
 -- Uses opencode.nvim internals (no public "session in directory" API); upstream
 -- refactors break this in isolation. Simplify once upstream lands
--- https://github.com/sudo-tee/opencode.nvim/issues/511.
+-- https://github.com/sudo-tee/opencode.nvim/issues/511
+-- (pinning semantics: .../issues/513).
 
 local M = {}
 
@@ -175,12 +176,10 @@ local function git_sync(cmd, cwd)
   return res.code == 0, res.stdout or ""
 end
 
----@param root string git toplevel
+---@param stdout string `git worktree list --porcelain` output
 ---@return {path: string, branch: string}[]
-local function list_worktrees(root)
-  local ok, stdout = git_sync({ "worktree", "list", "--porcelain" }, root)
+local function parse_worktrees(stdout)
   local items = {}
-  if not ok then return items end
   local path, branch
   for line in (stdout .. "\n"):gmatch "(.-)\n" do
     local wt = line:match "^worktree (.+)$"
@@ -196,12 +195,19 @@ local function list_worktrees(root)
   return items
 end
 
----@param root string git toplevel
----@return string[]
-local function list_branches(root)
-  local ok, stdout = git_sync({ "branch", "--format=%(refname:short)" }, root)
-  if not ok then return {} end
-  return vim.split(vim.trim(stdout), "\n", { trimempty = true })
+-- Close session tabs whose session lives in a deleted directory.
+---@param dir string
+local function close_tabs_for_dir(dir)
+  local session_tabs = require "opencode.state.session_tabs"
+  local session_runtime = require "opencode.services.session_runtime"
+  local target = vim.fs.normalize(dir):lower()
+  for _, tab in ipairs(session_tabs.list()) do
+    local s = tab.active_session
+    local d = s and (s.location and s.location.directory or s.directory)
+    if type(d) == "string" and vim.fs.normalize(d):lower() == target then
+      session_runtime.close_session_tab(tab.id)
+    end
+  end
 end
 
 ---@param root string git toplevel
@@ -211,10 +217,12 @@ end
 local function remove_worktree(root, path, branch, cb)
   -- Force on purpose: the user owns the consequences (uncommitted changes and
   -- unmerged branch work are discarded without asking).
-  git({ "worktree", "remove", "--force", path }, root, function(ok, _, stderr)    if not ok then
+  git({ "worktree", "remove", "--force", path }, root, function(ok, _, stderr)
+    if not ok then
       vim.notify("git worktree remove failed: " .. stderr, vim.log.levels.ERROR)
       return cb(false)
     end
+    close_tabs_for_dir(path)
     if branch == "(detached)" then return cb(true) end
     git({ "branch", "-D", branch }, root, function() cb(true) end)
   end)
@@ -227,7 +235,7 @@ local function delete_branch(root, branch, picker)
   git({ "branch", "-D", branch }, root, function(ok, _, stderr)
     if not ok then return vim.notify("git branch -D failed: " .. stderr, vim.log.levels.ERROR) end
     vim.notify("Deleted branch " .. branch, vim.log.levels.INFO)
-    picker:refresh()
+    if not picker.closed then picker:refresh() end
   end)
 end
 
@@ -235,9 +243,11 @@ end
 ---<C-d> force-delete worktree/branch, <C-r> refresh. Merging is left to the agent.
 function M.pick()
   local base = require("opencode.state").current_cwd or vim.fn.getcwd()
-  local ok, stdout = git_sync({ "rev-parse", "--show-toplevel" }, base)
+  -- Resolve the MAIN repo root even when the current tab sits in a worktree
+  -- (--show-toplevel would return the worktree's own path there).
+  local ok, stdout = git_sync({ "rev-parse", "--path-format=absolute", "--git-common-dir" }, base)
   if not ok then return vim.notify("Not a git repository", vim.log.levels.ERROR) end
-  local root = vim.trim(stdout)
+  local root = vim.fs.dirname(vim.trim(stdout))
 
   local keys = {
     ["<C-a>"] = { "worktree_create", mode = { "n", "i" }, desc = "New branch worktree" },
@@ -247,16 +257,23 @@ function M.pick()
   require("snacks").picker.pick {
     title = "Git Worktrees|<C-a> new|<C-d> del|<C-r> refresh",
     finder = function()
+      -- Spawn both listings concurrently: process startup dominates on Windows,
+      -- two sequential waits would double the picker latency.
+      local wt_proc = vim.system({ "git", "worktree", "list", "--porcelain" }, { cwd = root, text = true })
+      local br_proc = vim.system({ "git", "branch", "--format=%(refname:short)" }, { cwd = root, text = true })
+      local wt_res, br_res = wt_proc:wait(), br_proc:wait()
       local items = {}
       local in_worktree = {}
-      for _, wt in ipairs(list_worktrees(root)) do
+      for _, wt in ipairs(parse_worktrees(wt_res.stdout or "")) do
         in_worktree[wt.branch] = true
         table.insert(items, { text = wt.branch .. " " .. wt.path, path = wt.path, branch = wt.branch })
       end
       -- Also list worktree-less branches so they stay visible and manageable.
-      for _, b in ipairs(list_branches(root)) do
-        if not in_worktree[b] then
-          table.insert(items, { text = b .. " (no worktree)", branch = b })
+      if br_res.code == 0 then
+        for _, b in ipairs(vim.split(vim.trim(br_res.stdout or ""), "\n", { trimempty = true })) do
+          if not in_worktree[b] then
+            table.insert(items, { text = b .. " (no worktree)", branch = b })
+          end
         end
       end
       return items
@@ -280,6 +297,8 @@ function M.pick()
           local branch = input and sanitize_branch(vim.trim(input)) or ""
           if branch ~= "" then M.open_worktree(root, branch) end
         end)
+        -- The picker leaves us in normal mode; the name prompt expects typing.
+        vim.schedule(function() vim.cmd "startinsert!" end)
       end,
       worktree_delete = function(picker, item)
         if not item then return end
@@ -288,12 +307,17 @@ function M.pick()
           return vim.notify("Cannot remove the main worktree", vim.log.levels.WARN)
         end
         remove_worktree(root, item.path, item.branch, function(removed)
-          if removed then picker:refresh() end
+          -- Deleting the current tab's worktree closes that tab, which can take
+          -- the picker down with it.
+          if removed and not picker.closed then picker:refresh() end
         end)
       end,
       worktree_refresh = function(picker) picker:refresh() end,
     },
     win = { input = { keys = keys }, list = { keys = keys } },
+    -- Small vim.ui.select-style window; the default layout's preview pane is
+    -- wasted on this list.
+    layout = { preset = "select" },
   }
 end
 
