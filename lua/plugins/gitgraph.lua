@@ -31,7 +31,6 @@ return {
         merge_commit_end = "",
         commit_end = "",
 
-        -- Advanced symbols
         GVER = "",
         GHOR = "",
         GCLD = "",
@@ -56,7 +55,7 @@ return {
     end
   end,
   specs = {
-    { -- mapping to open GitGraph
+    {
       "AstroNvim/astrocore",
       opts = {
         mappings = {

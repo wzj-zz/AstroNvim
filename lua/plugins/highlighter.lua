@@ -2,7 +2,7 @@ local xtools = require "xtools"
 
 return {
   "azabiong/vim-highlighter",
-  lazy = false, -- Not Lazy by default
+  lazy = false,
   keys = {
     { "t<CR>", desc = "HiSetSL" },
     { "f<CR>", desc = "HiSet" },

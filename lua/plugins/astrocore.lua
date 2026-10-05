@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 -- if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
 
@@ -60,48 +60,42 @@ return {
     sessions = {
       autosave = { last = false, cwd = false },
     },
-    -- Configure core features of AstroNvim
     features = {
       large_buf = {
         size = 1024 * 1024,
         lines = false,
         line_length = false,
-      }, -- set global limits for large files for disabling features like treesitter
-      autopairs = true, -- enable autopairs at start
-      cmp = true, -- enable completion at start
-      diagnostics = { virtual_text = true, virtual_lines = false }, -- diagnostic settings on startup
-      highlighturl = true, -- highlight URLs at start
-      notifications = true, -- enable notifications at start
+      },
+      autopairs = true,
+      cmp = true,
+      diagnostics = { virtual_text = true, virtual_lines = false },
+      highlighturl = true,
+      notifications = true,
     },
-    -- Diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
     diagnostics = {
       virtual_text = true,
       underline = true,
     },
-    -- vim options can be configured here
     options = {
-      opt = { -- vim.opt.<key>
-        relativenumber = true, -- sets vim.opt.relativenumber
-        number = true, -- sets vim.opt.number
+      opt = {
+        relativenumber = true,
+        number = true,
         shellcmdflag = default_shellcmdflag,
         shellquote = default_shellquote,
-        spell = false, -- sets vim.opt.spell
+        spell = false,
         shell = default_shell,
         shellxquote = default_shellxquote,
-        signcolumn = "yes", -- sets vim.opt.signcolumn to yes
-        wrap = true, -- sets vim.opt.wrap
-        wrapscan = false, -- sets vim.opt.wrapscan
+        signcolumn = "yes",
+        wrap = true,
+        wrapscan = false,
       },
-      g = { -- vim.g.<key>
-        -- configure global vim variables (vim.g)
+      g = {
         -- NOTE: `mapleader` and `maplocalleader` must be set in the AstroNvim opts or before `lazy.setup`
         -- This can be found in the `lua/lazy_setup.lua` file
       },
     },
-    -- Mappings can be configured through AstroCore as well.
     -- NOTE: keycodes follow the casing in the vimdocs. For example, `<Leader>` must be capitalized
     mappings = {
-      -- Normal mode
       n = {
         ["<Leader>q"] = false,
         ["<Leader>h"] = false,
@@ -141,17 +135,13 @@ return {
         ["<M-3>"] = { "<cmd>tabn 3<cr>", desc = "goto tabn 3" },
         ["<M-4>"] = { "<cmd>tabn 4<cr>", desc = "goto tabn 4" },
 
-        -- navigate buffer and tabs
         ["<S-M-i>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
         ["<S-M-u>"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
 
-        -- mappings under group name "Language Tools"
         ["<Leader>lt"] = { "<cmd>InspectTree<cr>", desc = "Show AST" },
 
-        -- mappings under group name "Find"
         ["<Leader>fl"] = { function() require("telescope.builtin").filetypes() end, desc = "Select Language" },
 
-        -- mappings under group name "Buffer"
         ["<Leader>bv"] = { "<cmd>e!<cr>", desc = "Revert Buffer" },
         ["<Leader>bx"] = {
           function()
@@ -161,7 +151,6 @@ return {
           desc = "Close all buffers/windows except current",
         },
 
-        -- mappings under group name "Local"
         ["<Leader>,"] = { name = "Local" },
         ["<Leader>,a"] = { "<cmd>normal! ggVG<cr>", desc = "Select entire buffer" },
         ["<Leader>,dd"] = { "<cmd>diffthis<cr>", desc = "diffthis" },
@@ -255,14 +244,12 @@ return {
           desc = "Set cwd or Open file with clipboard",
         },
 
-        -- mappings under group name "Local/Hex"
         ["<Leader>,hh"] = { "<cmd>%!xxd -g 1<cr>", desc = "Switch to hex view" },
         ["<Leader>,hr"] = { "<cmd>%!xxd -r<cr>", desc = "Switch to binary view" },
         ["<Leader>,ho"] = { ":e ++binary ", desc = "Open binary file" },
         ["<Leader>,h"] = { name = "Hex" },
       },
 
-      -- Visual mode
       v = {
         ["<Leader>,"] = { name = "Local" },
         ["<Leader>,x"] = {
@@ -301,10 +288,8 @@ return {
         ["<S-PageDown>"] = { "<C-d>", desc = "" },
       },
 
-      -- Command mode
       c = { ["<C-v>"] = { "<C-r>*", desc = "Paste in Command mode" } },
 
-      -- Terminal mode
       t = {
         ["<C-l>"] = false,
         ["<M-w>"] = {
@@ -321,7 +306,6 @@ return {
         },
       },
 
-      -- Insert mode
       i = {
         ["<C-s>"] = { "<Esc>:w<cr>", desc = "Save" },
         ["<C-z>"] = { '<Esc><cmd>lua require("xtools").toggle_window_zoom()<cr>', desc = "Toggle window zoom" },

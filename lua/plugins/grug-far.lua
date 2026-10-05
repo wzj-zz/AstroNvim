@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 local default_opts = { instanceName = "main" }
 local function grug_far_open(opts, with_visual)

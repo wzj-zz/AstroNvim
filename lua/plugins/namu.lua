@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 return {
   "bassamsdata/namu.nvim",
@@ -7,12 +7,11 @@ return {
   opts = {
     namu_symbols = {
       options = {
-        -- in namu_symbols.options
         movement = {
           next = { "<C-n>", "<C-j>", "<DOWN>" },
           previous = { "<C-p>", "<C-k>", "<UP>" },
-          delete_word = { "<C-w>" }, -- delete word mapping
-          clear_line = { "<C-u>" }, -- clear line mapping
+          delete_word = { "<C-w>" },
+          clear_line = { "<C-u>" },
         },
       },
     },

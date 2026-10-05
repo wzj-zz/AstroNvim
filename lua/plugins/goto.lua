@@ -65,7 +65,6 @@ local function search_operator(forward, select_child)
   end
 end
 
--- Keymaps
 vim.keymap.set({ "n", "v" }, "<M->>", function()
   search_operator(true, 1)
 end, { desc = "Find next operator and select second operand" })

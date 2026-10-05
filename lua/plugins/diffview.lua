@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 return {
   "sindrets/diffview.nvim",
@@ -9,7 +9,7 @@ return {
 
     return {
       keymaps = {
-        disable_defaults = true, -- Disable the default keymaps
+        disable_defaults = true,
         view = {
           {
             "n",
@@ -111,15 +111,12 @@ return {
           },
         },
         diff1 = {
-          -- Mappings in single window diff layouts
           { "n", "g?", actions.help { "view", "diff1" }, { desc = "Open the help panel" } },
         },
         diff2 = {
-          -- Mappings in 2-way diff layouts
           { "n", "g?", actions.help { "view", "diff2" }, { desc = "Open the help panel" } },
         },
         diff3 = {
-          -- Mappings in 3-way diff layouts
           {
             { "n", "x" },
             "2do",
@@ -135,7 +132,6 @@ return {
           { "n", "g?", actions.help { "view", "diff3" }, { desc = "Open the help panel" } },
         },
         diff4 = {
-          -- Mappings in 4-way diff layouts
           {
             { "n", "x" },
             "1do",

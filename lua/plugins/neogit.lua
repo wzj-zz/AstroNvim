@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 return {
   "NeogitOrg/neogit",

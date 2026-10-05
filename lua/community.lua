@@ -1,10 +1,6 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 -- if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
--- AstroCommunity: import any community modules here
--- We import this file in `lazy_setup.lua` before the `plugins/` folder.
--- This guarantees that the specs are processed before any user plugins.
 
 ---@type LazySpec
 return {
@@ -44,7 +40,7 @@ return {
         -- },
         format = {
           enabled = true,
-          settings = { -- you can use your preferred format style
+          settings = {
             url = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
             profile = "GoogleStyle",
           },

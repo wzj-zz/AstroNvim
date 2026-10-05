@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 ---@type LazySpec
 return {
@@ -20,15 +20,15 @@ return {
         {
           filter = { event = "msg_show", find = ": No more items" },
           opts = { skip = true },
-        }, -- skip goto Quickfix No more items
+        },
         {
           filter = { event = "msg_show", find = "Search hit" },
           opts = { skip = true },
-        }, -- skip Search hit BOTTOM | TOP
+        },
         {
           filter = { event = "msg_show", find = "_reference hit" },
           opts = { skip = true },
-        }, -- skip goto_reference hit BOTTOM | TOP
+        },
         {
           filter = { event = "msg_show", find = "%d+L,%s%d+B" },
           opts = { skip = true },
@@ -90,7 +90,7 @@ return {
         {
           filter = { event = "notify", find = "^No next user message$" },
           opts = { skip = true },
-        }, -- skip opencode user-message boundary
+        },
         {
           filter = { event = "notify", find = "^No previous user message$" },
           opts = { skip = true },

@@ -1,6 +1,5 @@
-if not vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if not vim.g.vscode then return {} end
 
--- Set `vim.notify` to VS Code notifications
 vim.notify = require("vscode").notify
 
 local enabled = {}
@@ -47,15 +46,12 @@ vim.tbl_map(function(plugin) enabled[plugin] = true end, {
 })
 
 local Config = require "lazy.core.config"
--- disable plugin update checking
 Config.options.checker.enabled = false
 Config.options.change_detection.enabled = false
--- replace the default `cond`
 Config.options.defaults.cond = function(plugin) return enabled[plugin.name] end
 
 ---@type LazySpec
 return {
-  -- add a few keybindings
   {
     "AstroNvim/astrocore",
     ---@param opts AstroCoreOpts

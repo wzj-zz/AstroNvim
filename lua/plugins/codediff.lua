@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 local function set_codediff_aliases()
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do

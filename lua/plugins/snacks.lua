@@ -1,4 +1,4 @@
-if vim.g.vscode then return {} end -- don't do anything in non-vscode instances
+if vim.g.vscode then return {} end
 
 local Snacks = require "snacks"
 
@@ -34,7 +34,6 @@ return {
   },
   keys = {
     { "<Leader>se", function() Snacks.explorer() end, desc = "File Explorer" },
-    -- Grep
     { "<Leader>sb", function() Snacks.picker.lines() end, desc = "Buffer Lines" },
     { "<Leader>sB", function() Snacks.picker.grep_buffers() end, desc = "Grep Open Buffers" },
     { "<Leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
@@ -45,7 +44,6 @@ return {
       mode = { "n", "x" },
     },
     { "<Leader>sf", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
-    -- search
     { "<Leader>sr", function() Snacks.picker.registers() end, desc = "Registers" },
     { "<Leader>s/", function() Snacks.picker.search_history() end, desc = "Search History" },
     { "<Leader>sa", function() Snacks.picker.autocmds() end, desc = "Autocmds" },
@@ -70,7 +68,6 @@ return {
 
     { "<Leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "LSP Symbols" },
     { "<Leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
-    -- Other
     {
       "<M-p>",
       function() Snacks.words.jump(-vim.v.count1) end,
@@ -104,13 +101,10 @@ return {
     vim.api.nvim_create_autocmd("User", {
       pattern = "VeryLazy",
       callback = function()
-        -- Setup some globals for debugging (lazy-loaded)
         _G.dd = function(...) Snacks.debug.inspect(...) end
         _G.bt = function() Snacks.debug.backtrace() end
         vim.print = _G.dd -- Override print to use snacks for `:=` command
 
-        -- Create some toggle mappings
-        -- Snacks.toggle.treesitter():map "<Leader>uT"
         Snacks.toggle.dim():map "<Leader>sx"
       end,
     })
