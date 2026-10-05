@@ -188,7 +188,7 @@ vim.api.nvim_create_autocmd("FileType", {
     -- AstroNvim maps `q` to close for nofile buffers on BufWinEnter; pre-empt it
     -- with a <Nop> so `q` stays inert in opencode windows (like the disabled <Esc>).
     vim.keymap.set("n", "q", "<Nop>", { buffer = event.buf })
-    -- <M-f>: toggle current-file context (= "Current File" in the `#` picker; config default off).
+    -- <M-f>: toggle current-file context (= "Current File" in the `#` picker; config default on).
     vim.keymap.set({ "n", "i" }, "<M-f>", function()
       require("opencode.context").toggle_context("current_file")
     end, { buffer = event.buf, desc = "Toggle current file context" })
@@ -429,7 +429,7 @@ return {
       context = {
         enabled = true,
         current_file = {
-          enabled = false,
+          enabled = true,
           show_full_path = true,
         },
         files = {
