@@ -300,7 +300,6 @@ return {
         input_window = {
           ["<esc>"] = false,
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
-          ["<C-r>"] = { "rename_session", mode = { "n", "i" }, desc = "Rename session" },
           ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
           ["<M-j>"] = {
             "navigate_session_tree",
