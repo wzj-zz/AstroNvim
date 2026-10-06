@@ -1,5 +1,5 @@
 if vim.loop.os_uname().sysname == "Windows_NT" then
-  vim.g.sqlite_clib_path = vim.fn.stdpath "config" .. "\\sqlite3.dll"
+  vim.g.sqlite_clib_path = vim.fn.stdpath "config" .. "/bin/sqlite3.dll"
 end
 
 return {
