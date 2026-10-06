@@ -622,7 +622,7 @@ Treesitter 文本对象交换：
 
 ### AI Chat
 
-需要安装 `opencode`。当前使用插件的 `v2` 分支以支持 OpenCode v2（该分支仍在开发中，可能会有变动）。v1 与 v2 可共存：v1 是 `opencode` 命令，v2 是 `opencode2` 命令，两者会话存储互相独立；插件通过 `opencode_executable = "opencode2"` 连接 v2：
+需要安装 `opencode`。插件 main 分支同时支持 OpenCode v1 与 v2（自动协议识别）。v1 与 v2 可共存：v1 是 `opencode` 命令，v2 是 `opencode2` 命令，两者会话存储互相独立；插件通过 `opencode_executable = "opencode2"` 连接 v2：
 
 - `<M-o>`：打开或关闭 AI 窗口
 - `<Leader>aa`：选择会话

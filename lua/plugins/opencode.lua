@@ -253,7 +253,6 @@ vim.api.nvim_create_autocmd("FileType", {
 return {
   {
     "sudo-tee/opencode.nvim",
-    branch = "v2", -- OpenCode v2 support (testing branch, not yet merged to main)
     cmd = { "Opencode" },
     keys = {
       { "<M-o>", mode = { "n", "i" }, desc = "Toggle windows" },
