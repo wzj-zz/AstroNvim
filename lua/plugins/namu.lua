@@ -21,6 +21,7 @@ return {
     opts = {
       mappings = {
         n = {
+          ["<Leader>v"] = { name = "Namu" },
           ["<M-f>"] = { "<cmd>Namu symbols<cr>", desc = "Namu symbols" },
           ["<S-M-f>"] = { "<cmd>Namu ctags<cr>", desc = "Namu ctags" },
           ["<Leader>vx"] = { "<cmd>Namu watchtower<cr>", desc = "Namu watchtower (lsp/treesitter)" },
