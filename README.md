@@ -120,7 +120,7 @@ rm -r ~/.local/state/nvim.bak
 rm -r ~/.cache/nvim.bak
 ```
 
-剪贴板：桌面 Linux 需要自行安装 `wl-clipboard`（Wayland）或 `xclip`（X11）。WSL 下固定使用仓库自带的 `bin/win32yank.exe`（来自 Windows 版 Neovim 的官方捆绑副本）与 Windows 剪贴板互通，无需安装任何东西，也不受 WSL 里其他剪贴板工具影响。SSH 到无图形环境时，复制会自动通过终端回传到本地剪贴板（需要终端支持 OSC 52；从本地读取粘贴取决于终端是否支持 OSC 52 读取）。
+剪贴板：桌面 Linux 需安装剪贴板工具（Wayland：`wl-clipboard` 或 `wayclip`；X11：`xclip` 或 `xsel`）；WSL 无需安装，固定用仓库自带的 `bin/win32yank.exe` 与 Windows 互通；SSH 无图形环境时复制经 OSC 52 回传本地；粘贴本地内容需在插入模式下用终端的粘贴快捷键（如 Windows Terminal 的 `Ctrl+Shift+V`），`p` 只能粘贴本会话内复制的内容。
 
 ## General Features
 
@@ -521,7 +521,7 @@ Visual 模式下 `<S-方向键>` / `<C-S-Left>` / `<C-S-Right>` / `<S-PageUp>` /
 
 命令模式下 `<C-v>`：粘贴系统剪贴板。
 
-SSH 到无图形环境的 Linux 服务器时，复制会自动通过终端回传到本地剪贴板（需要终端支持 OSC 52；从本地读取粘贴取决于终端是否支持 OSC 52 读取）。
+SSH 到无图形环境的 Linux 服务器时：复制自动回传到本地剪贴板；粘贴本地内容需在插入模式下用终端的粘贴快捷键（如 Windows Terminal 的 `Ctrl+Shift+V`），`p` / `<C-v>` 只能粘贴本会话内复制的内容。
 
 语法节点选择：
 

@@ -94,7 +94,7 @@ return {
         -- This can be found in the `lua/lazy_setup.lua` file
 
         clipboard = (function()
-          -- WSL 固定用仓库自带的 win32yank，与 Windows 剪贴板互通，也避免 WSL 里的 wl-copy/xclip 抢优先级
+          -- WSL 固定用仓库自带的 win32yank，避免 wl-copy/xclip 抢优先级
           if vim.fn.has "wsl" == 1 then
             local win32yank = vim.fn.stdpath "config" .. "/bin/win32yank.exe"
             return {
@@ -103,17 +103,30 @@ return {
               paste = { ["+"] = { win32yank, "-o", "--lf" }, ["*"] = { win32yank, "-o", "--lf" } },
             }
           end
-          -- 其余环境走 Neovim 默认探测链；无任何可用工具时（如 SSH 服务器）兜底 OSC 52
+          -- 其余环境走默认探测链；无可用工具时（如 SSH 服务器）兜底 OSC 52
           if is_windows or vim.fn.has "macunix" == 1 then return nil end
           if vim.env.WAYLAND_DISPLAY and (vim.fn.executable "wl-copy" == 1 or vim.fn.executable "waycopy" == 1) then
             return nil
           end
           if vim.env.DISPLAY and (vim.fn.executable "xsel" == 1 or vim.fn.executable "xclip" == 1) then return nil end
-          for _, tool in ipairs { "lemonade", "doitclient", "termux-clipboard-set" } do
-            if vim.fn.executable(tool) == 1 then return nil end
-          end
+          if vim.fn.executable "termux-clipboard-set" == 1 then return nil end
           if vim.env.TMUX and vim.fn.executable "tmux" == 1 then return nil end
-          return "osc52"
+          -- 粘贴只回本会话复制过的内容：OSC 52 读取在不支持的终端上会挂起
+          local osc52 = require "vim.ui.clipboard.osc52"
+          local cache = {}
+          local function wrap_copy(reg)
+            local copy = osc52.copy(reg)
+            return function(lines, regtype)
+              cache[reg] = { lines, regtype }
+              copy(lines, regtype)
+            end
+          end
+          local function wrap_paste(reg) return function() return cache[reg] or {} end end
+          return {
+            name = "osc52-copy-only",
+            copy = { ["+"] = wrap_copy "+", ["*"] = wrap_copy "*" },
+            paste = { ["+"] = wrap_paste "+", ["*"] = wrap_paste "*" },
+          }
         end)(),
       },
     },
