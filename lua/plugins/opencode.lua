@@ -380,9 +380,13 @@ return {
           -- <M-q>: close the whole diff view from any scope (`q` in floats only closes the float).
           list = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
+            -- Mirror codediff's <M-e>; count clamps when only one diff pane exists.
+            ["<M-e>"] = { function() vim.cmd "2wincmd l" end, desc = "Focus diff pane" },
           },
           preview = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
+            -- Mirror codediff's <Leader>e explorer focus; count clamps to the leftmost window.
+            ["<Leader>e"] = { function() vim.cmd "99wincmd h" end, desc = "Focus file list" },
           },
           messages = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
