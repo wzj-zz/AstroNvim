@@ -706,6 +706,8 @@ Session diff 审查（V2）：`<Leader>ad` 或 `:Opencode diff open` 打开最�
 
 - 文件树：`j`/`k` 移动、`<CR>` 展开目录、`<M-e>` 聚焦 diff 窗格（与 codediff 一致）
 - diff 窗格：`<Leader>e` 回到文件列表
+- `<Tab>` / `<S-Tab>`：下一个或上一个文件
+- `gf`：在新 tab 打开真实文件，跳到改动后的对应行
 - `p`：切换 unified patch 视图
 - `r`：进入轮次范围选择（`f` 标记起点、`t` 标记终点、`<CR>` 确认）
 - 评审评论：`c` 对行或选区添加、`dc` 删除、`]r` / `[r` 在评论间跳转（评论会随下一条 prompt 发送）
