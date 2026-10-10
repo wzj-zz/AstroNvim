@@ -331,7 +331,7 @@ return {
           ["<M-4>"] = { "select_session_tab", { 4 }, mode = { "n", "i" }, desc = "Session tab 4" },
           ["<M-c>"] = { "open_session_tab", mode = { "n", "i" }, desc = "New session tab" },
           ["<M-x>"] = { "close_session_tab", mode = { "n", "i" }, desc = "Close session tab" },
-          ["<C-a>"] = { "select_session", mode = { "n", "i" }, desc = "Sessions" },
+          ["<C-a>"] = { "select_session", { nil, "project" }, mode = { "n", "i" }, desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = { "n", "i" }, desc = "MCP picker" },
           ["<M-s>"] = { "skills", mode = { "n", "i" }, desc = "Skills picker" },
           ["<C-z>"] = { "toggle_zoom", mode = { "n", "i" }, desc = "Toggle window zoom" },
@@ -355,7 +355,7 @@ return {
         output_window = {
           ["<esc>"] = false,
           ["<C-r>"] = { "rename_session", mode = "n", desc = "Rename session" },
-          ["<C-a>"] = { "select_session", mode = "n", desc = "Sessions" },
+          ["<C-a>"] = { "select_session", { nil, "project" }, mode = "n", desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = "n", desc = "MCP picker" },
           ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = "n", desc = "Parent session" },
           ["<M-j>"] = {
