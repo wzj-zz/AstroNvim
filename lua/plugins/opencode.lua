@@ -288,6 +288,21 @@ return {
       preferred_completion = "blink",
       default_mode = "build",
       opencode_executable = "opencode2",
+      -- Repo-wide session lock: bound worktree tabs stay pinned across :cd
+      -- inside the same repo (main checkout <-> worktrees), and unpin when
+      -- leaving it. Requires https://github.com/sudo-tee/opencode.nvim/pull/517.
+      lock_session_to_directory = function(change)
+        local function common_dir(dir)
+          local ok, res = pcall(function()
+            return vim
+              .system({ "git", "-C", dir, "rev-parse", "--path-format=absolute", "--git-common-dir" }, { text = true })
+              :wait()
+          end)
+          return (ok and res and res.code == 0) and vim.trim(res.stdout) or nil
+        end
+        local repo = common_dir(change.from)
+        return repo ~= nil and repo == common_dir(change.to)
+      end,
       keymap = {
         editor = {
           ["<M-o>"] = { "toggle", mode = { "n", "i" }, desc = "Toggle windows" },

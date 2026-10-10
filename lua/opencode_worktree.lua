@@ -1,14 +1,10 @@
 -- Backend for the worktree picker on <M-w> in opencode windows (registered in
 -- lua/plugins/opencode.lua via a buffer-local FileType autocmd).
 --
--- Worktrees live under <repo>/.worktrees/<branch>; a session tab opened there is
--- pinned to its repo: :cd inside the same repo cannot hijack it, :cd to another
--- repo unpins it and follows normally.
---
--- Uses opencode.nvim internals (no public "session in directory" API); upstream
--- refactors break this in isolation. Simplify once upstream lands
--- https://github.com/sudo-tee/opencode.nvim/issues/511
--- (pinning semantics: .../issues/513).
+-- Worktrees live under <repo>/.worktrees/<branch>. Tabs are directory-bound via
+-- the official API (https://github.com/sudo-tee/opencode.nvim/pull/517,
+-- issues #511/#513): same-repo :cd stays pinned (repo-wide lock policy in
+-- lua/plugins/opencode.lua), :cd to another repo unbinds the tab.
 
 local M = {}
 
@@ -43,116 +39,46 @@ local function exclude_worktrees_dir(root)
   end
 end
 
--- tab id -> main repo root, for tabs created by this module.
----@type table<string, string>
-local repo_root_by_tab = {}
-
-local scoped_lock_installed = false
-
----@param dir string
----@param root string
----@return boolean
-local function dir_is_under(dir, root)
-  local n = vim.fs.normalize(dir):lower()
-  local r = vim.fs.normalize(root):lower()
-  return n == r or n:sub(1, #r + 1) == r .. "/"
-end
-
--- Patch two plugin internals so worktree tabs are pinned only within their repo:
--- is_session_locked (the plugin's only session-swap decision point) reports locked
--- only while cwd is under the tab's repo root; set_current_cwd is blocked
--- in-family so the tab keeps pointing at the worktree (<C-n>, `@` completion),
--- and unpins the tab once cwd leaves the repo. Other tabs keep plugin semantics.
-local function install_scoped_lock()
-  if scoped_lock_installed then return end
-  scoped_lock_installed = true
-  local session_runtime = require "opencode.services.session_runtime"
-  local session_tabs = require "opencode.state.session_tabs"
-  local context = require "opencode.state.context"
-
-  local orig_is_locked = session_runtime.is_session_locked
-
-  -- Repo root when the active tab is one of our locked worktree tabs, else nil.
-  local function locked_tab_root()
-    if not orig_is_locked() then return nil end
-    local ok, tab = pcall(session_tabs.current)
-    return (ok and tab and repo_root_by_tab[tab.id]) or nil
-  end
-
-  session_runtime.is_session_locked = function()
-    local root = locked_tab_root()
-    if not root then return orig_is_locked() end
-    return dir_is_under(vim.fn.getcwd(), root)
-  end
-
-  local orig_set_cwd = context.set_current_cwd
-  context.set_current_cwd = function(cwd)
-    local root = locked_tab_root()
-    if root then
-      if dir_is_under(cwd, root) then return end
-      local ok, tab = pcall(session_tabs.current)
-      if ok and tab then repo_root_by_tab[tab.id] = nil end
-      session_runtime.set_session_lock(false)
-    end
-    return orig_set_cwd(cwd)
-  end
-end
-
 ---@param worktree_path string
 ---@param branch string
----@param root string git toplevel of the main repo
-local function open_session_tab(worktree_path, branch, root)
-  local Promise = require "opencode.promise"
-  Promise.async(function()
-    local util = require "opencode.util"
+local function open_session_tab(worktree_path, branch)
+  require("opencode.promise").async(function()
+    local session_tabs = require "opencode.state.session_tabs"
     local session_runtime = require "opencode.services.session_runtime"
-    local connection = require("opencode.server_job").ensure_server():await()
-
-    local location = { directory = worktree_path }
-
-    -- Reopen the directory's most recent session if one exists (its tab may
-    -- have been closed); only create a fresh session otherwise.
-    local existing = connection.operations
-      .list_sessions_project(connection, location, util.apply_path_map, util.apply_reverse_path_map)
-      :await()
-    local session
-    if type(existing) == "table" then
-      table.sort(existing, function(a, b)
-        return (a.time and a.time.updated or 0) > (b.time and b.time.updated or 0)
-      end)
-      for _, s in ipairs(existing) do
-        if s.parentID == nil then
-          session = s
-          break
-        end
+    local target = vim.fs.normalize(worktree_path):lower()
+    -- Prefer the tab already bound to this directory: the reuse lookup inside
+    -- open_session matches server-side session paths, which don't survive
+    -- Windows cwd/port mapping — without this every <CR> spawns a new session.
+    for _, tab in ipairs(session_tabs.list()) do
+      local dir = tab.bound_directory
+      if not dir then
+        -- Tabs restored on startup have no binding; match by session dir.
+        local s = tab.active_session
+        dir = s and (s.location and s.location.directory or s.directory)
+      end
+      if dir and vim.fs.normalize(dir):lower() == target then
+        session_runtime.switch_session_tab(tab.id):await()
+        return vim.notify("Worktree session ready: " .. branch, vim.log.levels.INFO)
       end
     end
-    if not session then
-      session = connection.operations
-        .create_session(connection, location, { title = "wt:" .. branch }, util.apply_path_map, util.apply_reverse_path_map)
-        :await()
+    -- open_session reopens the directory's most recent root session if one
+    -- exists (its tab may have been closed); creates a fresh one otherwise.
+    local ok, err = pcall(function()
+      require("opencode.api").open_session({ directory = worktree_path, title = "wt:" .. branch }):await()
+    end)
+    if ok then
+      vim.notify("Worktree session ready: " .. branch, vim.log.levels.INFO)
+    else
+      vim.notify("Open worktree session failed: " .. vim.inspect(err), vim.log.levels.ERROR)
     end
-    if not session or not session.id then
-      return vim.notify("Failed to create session for worktree " .. branch, vim.log.levels.ERROR)
-    end
-    session.location = session.location or location
-
-    session_runtime.open_session_in_tab(session):await()
-
-    -- Point the new tab at the worktree and pin it (see install_scoped_lock).
-    require("opencode.state.context").set_current_cwd(worktree_path)
-    session_runtime.set_session_lock(true)
-    repo_root_by_tab[require("opencode.state.session_tabs").active_id()] = root
-    install_scoped_lock()
-    vim.notify("Worktree session ready: " .. branch, vim.log.levels.INFO)
-  end)():catch(function(err) vim.notify("Open worktree session failed: " .. vim.inspect(err), vim.log.levels.ERROR) end)
+  end)()
 end
 
----@param root string git toplevel
+---@param root string git toplevel of the main repo
 ---@param branch string
 function M.open_worktree(root, branch)
   local path = root .. "/.worktrees/" .. branch
-  if vim.uv.fs_stat(path) then return open_session_tab(path, branch, root) end
+  if vim.uv.fs_stat(path) then return open_session_tab(path, branch) end
 
   exclude_worktrees_dir(root)
   vim.fn.mkdir(vim.fs.dirname(path), "p")
@@ -162,7 +88,7 @@ function M.open_worktree(root, branch)
     vim.notify("Creating worktree " .. branch .. " ...", vim.log.levels.INFO)
     git(cmd, root, function(ok, _, stderr)
       if not ok then return vim.notify("git worktree add failed: " .. stderr, vim.log.levels.ERROR) end
-      open_session_tab(path, branch, root)
+      open_session_tab(path, branch)
     end)
   end)
 end
@@ -202,9 +128,18 @@ local function close_tabs_for_dir(dir)
   local session_runtime = require "opencode.services.session_runtime"
   local target = vim.fs.normalize(dir):lower()
   for _, tab in ipairs(session_tabs.list()) do
-    local s = tab.active_session
-    local d = s and (s.location and s.location.directory or s.directory)
+    -- PR #517's open_session attaches a bound tab directory.
+    local d = tab.bound_directory
+    if not d then
+      local s = tab.active_session
+      d = s and (s.location and s.location.directory or s.directory)
+    end
     if type(d) == "string" and vim.fs.normalize(d):lower() == target then
+      if tab.id == session_tabs.active_id() then
+        -- Closing the current tab from inside it switches into another tab;
+        -- the policy would carry our binding along, so detach first.
+        tab.bound_directory = nil
+      end
       session_runtime.close_session_tab(tab.id)
     end
   end
@@ -285,7 +220,7 @@ function M.pick()
       picker:close()
       if not item then return end
       if item.path then
-        open_session_tab(item.path, item.branch, root)
+        open_session_tab(item.path, item.branch)
       else
         M.open_worktree(root, item.branch)
       end
