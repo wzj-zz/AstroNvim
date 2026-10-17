@@ -315,14 +315,14 @@ return {
         input_window = {
           ["<esc>"] = false,
           ["<C-s>"] = { "submit_input_prompt", mode = { "n", "i" }, desc = "Submit prompt" },
-          ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
-          ["<M-j>"] = {
+          ["<M-H>"] = { "navigate_session_tree", { "parent" }, mode = { "n", "i" }, desc = "Parent session" },
+          ["<M-J>"] = {
             "navigate_session_tree",
             { "sibling", "picker" },
             mode = { "n", "i" },
             desc = "Sibling sessions",
           },
-          ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
+          ["<M-L>"] = { "navigate_session_tree", { "child", "picker" }, mode = { "n", "i" }, desc = "Child sessions" },
           ["<M-,>"] = { "prev_session_tab", mode = { "n", "i" }, desc = "Prev session tab" },
           ["<M-.>"] = { "next_session_tab", mode = { "n", "i" }, desc = "Next session tab" },
           ["<M-1>"] = { "select_session_tab", { 1 }, mode = { "n", "i" }, desc = "Session tab 1" },
@@ -357,14 +357,14 @@ return {
           ["<C-r>"] = { "rename_session", mode = "n", desc = "Rename session" },
           ["<C-a>"] = { "select_session", { nil, "project" }, mode = "n", desc = "Sessions" },
           ["<C-o>"] = { "mcp", mode = "n", desc = "MCP picker" },
-          ["<M-h>"] = { "navigate_session_tree", { "parent" }, mode = "n", desc = "Parent session" },
-          ["<M-j>"] = {
+          ["<M-H>"] = { "navigate_session_tree", { "parent" }, mode = "n", desc = "Parent session" },
+          ["<M-J>"] = {
             "navigate_session_tree",
             { "sibling", "picker" },
             mode = "n",
             desc = "Sibling sessions",
           },
-          ["<M-l>"] = { "navigate_session_tree", { "child", "picker" }, mode = "n", desc = "Child sessions" },
+          ["<M-L>"] = { "navigate_session_tree", { "child", "picker" }, mode = "n", desc = "Child sessions" },
           ["<M-,>"] = { "prev_session_tab", mode = "n", desc = "Prev session tab" },
           ["<M-.>"] = { "next_session_tab", mode = "n", desc = "Next session tab" },
           ["<M-1>"] = { "select_session_tab", { 1 }, mode = "n", desc = "Session tab 1" },
