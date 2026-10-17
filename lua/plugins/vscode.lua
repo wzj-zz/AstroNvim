@@ -37,8 +37,6 @@ vim.tbl_map(function(plugin) enabled[plugin] = true end, {
   "treesj",
   "tshjkl.nvim",
   "wildfire.nvim",
-  "arshlib.nvim",
-  "indent-tools.nvim",
   "vim-matchup",
   "vim-highlighter",
   "marks.nvim",

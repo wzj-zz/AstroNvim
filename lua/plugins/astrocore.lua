@@ -166,6 +166,9 @@ return {
           desc = "Next git hunk",
         },
 
+        ["<M-j>"] = { function() vim.cmd "normal! 3j" end, desc = "Move down" },
+        ["<M-k>"] = { function() vim.cmd "normal! 3k" end, desc = "Move up" },
+
         ["<M-1>"] = { "<cmd>tabn 1<cr>", desc = "goto tabn 1" },
         ["<M-2>"] = { "<cmd>tabn 2<cr>", desc = "goto tabn 2" },
         ["<M-3>"] = { "<cmd>tabn 3<cr>", desc = "goto tabn 3" },

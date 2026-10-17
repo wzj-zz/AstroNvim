@@ -5,6 +5,17 @@
 这份文档只写配置里有哪些功能，以及对应怎么触发。
 
 - `Space` 是 `leader`
+- 各小节标题后括号内为功能来源，插件用 `(xxx.nvim)` 格式，本地 Lua 文件用 `(xxx.lua)` 格式，方便搜索定位（如 `(snacks.nvim)`、`(astrocore.lua)`）
+
+## 外部依赖
+
+| 功能 | 依赖 |
+|-----|------|
+| zoxide 目录跳转 | `zoxide` |
+| ctags 符号 | `ctags` |
+| GitHub 集成 | `gh` |
+| 全局代码导航 (Cscope) | `gtags-cscope` (GNU Global) + `fd` |
+| AI Chat | `opencode` |
 
 ## Contents
 
@@ -124,7 +135,7 @@ rm -r ~/.cache/nvim.bak
 
 ## General Features
 
-### Search
+### Search (snacks.nvim)
 
 - `<Leader>sf`：智能查找文件
 - `<Leader>fl`：选择文件类型
@@ -154,12 +165,12 @@ rm -r ~/.cache/nvim.bak
 - `<Leader>sR`：恢复上一次 picker
 - `<Leader>su`：查看撤销历史
 
-Telescope 中可用：
+Telescope 中可用（telescope.nvim）：
 
 - `<M-CR>`：打开全部结果；有多选时 `<CR>` 打开所有选中项
 - 插入模式下 `<M-s>`：用 flash 标签跳到某个结果行
 
-### Files and Directories
+### Files and Directories (snacks.nvim / mini.files.nvim / neo-tree.nvim)
 
 - `<Leader>o`：打开 `mini.files`
 - `<Leader>e`：打开 `Neo-tree Explorer`
@@ -168,16 +179,15 @@ Telescope 中可用：
   - picker 内 `<C-e>` / `<C-f>` / `<C-g>` / `<C-r>`：tcd 到所选目录并打开 explorer / 文件搜索 / grep / 最近文件
   - picker 内 `<C-w>`：tcd 到所选目录并关闭 picker
 
-### Code Navigation
+### Code Navigation (astrocore.lua / snacks.nvim / flash.nvim / aerial.nvim / treewalker.nvim / vim-matchup.nvim / namu.nvim / nvim-treesitter-textobjects.nvim)
 
 - `<M-d>`：定义
 - `<M-r>`：引用
 - `<M-y>`：类型定义
 - `<M-i>`：实现
-- `<M-n>`：跳到下一个相同符号引用
-- `<M-p>`：跳到上一个相同符号引用
+- `<M-n>` / `<M-p>`：在符号引用间跳转（光标所在符号自动高亮所有引用）(snacks.nvim words)
 - `gD`：声明
-- `<C-g>`：当前文件符号大纲
+- `<C-g>`：当前文件符号大纲（aerial.nvim）
 - `<Leader>lt`：查看语法树
 - `s`：Flash 拼音跳转；Normal / Visual 模式下实时筛选当前屏幕可见范围内的可搜索串，支持中文拼音、首字母和英文/数字混合搜索；直接使用标签跳转
 - `r`：Operator-pending 模式下使用 Flash 拼音远程选择操作目标
@@ -186,15 +196,20 @@ Telescope 中可用：
 - `<M-S>`：跳到上一个后面跟 `(`、`{`、`[`、`<` 的符号名
 - `<M->>`：跳到下一个操作符，并选中右侧表达式
 - `<M-<>`：跳到上一个操作符，并选中左侧表达式
-- `<C-H>` / `<C-J>` / `<C-K>` / `<C-L>`：按语法树移动到左下上右节点
-- `<M-j>` / `<M-k>`：跳到下一个或上一个同缩进块
-- `<Leader>vu`：跳到当前语法上下文起点（支持计数）
+- `<C-H>` / `<C-J>` / `<C-K>` / `<C-L>`：按语法树移动到左下上右节点（treewalker.nvim）
+- `<Leader>vu`：跳到当前语法上下文起点（treesitter-context.nvim，支持计数）
 - `<M-a>`：跳到配对符（相当于 `%`）
 - `<M-e>`：跳到配对符内部（相当于 `z%`）
 - `<M-u>`：跳到配对符外层（相当于 `[%`，支持计数）
+- `<M-j>` / `<M-k>`：向下或向上移动 3 行
 - Operator-pending / Visual 模式下 `R`：Flash Treesitter 远程选择
 
-Namu：
+作用域文本对象与跳转（snacks.nvim scope，基于 treesitter，失败时回退到缩进）：
+
+- `ii` / `ai`：当前作用域块的内层或外层文本对象（如 `vii`、`vai`、`dii`、`yai`）
+- `[i` / `]i`：跳到当前作用域块的起始或结束边缘；已在边缘时跳到父级作用域
+
+Namu（namu.nvim）：
 
 - `<M-f>`：当前文件符号
 - `<S-M-f>`：当前文件 ctags 符号（需要安装 `ctags`）
@@ -276,7 +291,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<C-c>b`：构建数据库
 - `<C-c>B`：强制重建数据库
 
-### Buffers, Windows and Tabs
+### Buffers, Windows and Tabs (astrocore.lua / xtools.lua)
 
 - `<C-z>`：当前窗口全屏或恢复原大小
 - `<M-q>`：关闭当前窗口或当前 tab
@@ -286,9 +301,10 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<S-M-u>`：上一个 buffer
 - `<Leader>bv`：恢复当前文件内容
 - `<Leader>bx`：关闭其他 buffer 和窗口
+- `<Leader>bo`：关闭其他所有 buffer（保留当前，窗口布局不变）
 - `<M-1>` 到 `<M-4>`：跳到指定 tab
 
-### Quickfix
+### Quickfix (nvim-bqf.nvim / xtools.lua)
 
 - `<M-;>`：打开或关闭 quickfix
 - `<M-9>`：上一条 quickfix
@@ -303,7 +319,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<Leader>sv`：只保留当前 quickfix 涉及文件中包含指定内容的文件，并为每个文件保留一条 quickfix 结果
 - Visual 模式下 `<Leader>vv`：只保留当前文件中位于选区行号范围内的 quickfix 结果
 
-### Search and Replace
+### Search and Replace (grug-far.nvim)
 
 - `<Leader>ro`：全项目搜索替换
 - `<Leader>rr`：只在当前文件搜索替换
@@ -314,7 +330,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - Visual 模式下 `<Leader>rv`：只在选中范围内替换
 - Neo-tree / mini.files 中 `gS`：以当前节点或目录为范围打开搜索替换
 
-### Git
+### Git (neogit.nvim / gitsigns.nvim / codediff.nvim / diffview.nvim / gitgraph.nvim)
 
 - `<Leader>gg`：在当前目录打开 Neogit
 - `<Leader>gf`：切到当前 nvim 配置目录并在该目录打开 Neogit
@@ -326,12 +342,12 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<M-[>`：跳到上一个 git hunk
 - `<M-]>`：跳到下一个 git hunk
 
-Codediff：
+Codediff（codediff.nvim）：
 
 - 用来查看 Git 变更、文件差异和冲突处理
 - 在 `Neogit` 里查看 diff 时，会优先使用 `codediff`
 
-Codediff 视图中可用：
+视图中可用：
 
 - `<M-q>`：关闭 Codediff
 - `<Leader>b`：切换文件列表
@@ -362,11 +378,11 @@ Codediff 视图中可用：
 - `2do`：取 incoming
 - `3do`：取 current
 
-Diffview：
+Diffview（diffview.nvim）：
 
 - 用来查看提交差异、文件变更和合并冲突
 
-Diffview 视图中可用：
+视图中可用：
 
 - `<M-q>`：关闭 Diffview
 - `<M-n>` / `<M-p>`：下一个或上一个 diff hunk
@@ -410,22 +426,20 @@ Diffview 提交历史面板中可用：
 - `L`：查看提交详情
 - `X`：恢复文件到该提交的状态
 
-### Harpoon
+### Harpoon (harpoon.nvim)
 
 - `<S-M-m>`：把当前文件加入 Harpoon
 - `<M-m>`：打开 Harpoon 列表
 - `<Leader>1` 到 `<Leader>5`：跳到第 1 到第 5 个 Harpoon 文件
 
-### Sessions
+### Sessions (resession.nvim)
 
 - `<Leader>,>`：保存当前标签页会话
 - `<Leader>,.`：加载会话
 - `<Leader>,/`：从当前会话分离
 - `<Leader>,?`：删除会话
 
-### Bookmarks
-
-使用 `xmark.nvim` 默认快捷键管理书签和书签列表。
+### Bookmarks (xmark.nvim)
 
 - `<Leader>mm`：添加或更新当前书签
 - `<Leader>mt`：切换当前书签状态
@@ -455,7 +469,7 @@ Diffview 提交历史面板中可用：
 - `:XmarkExport path.json`：命令行导出方式；导出当前活动书签列表
 - 这两个命令都支持带空格的带引号路径
 
-### Quick Actions
+### Quick Actions (astrocore.lua / xtools.lua)
 
 - `<Leader>,a`：全选当前文件
 - `<Leader>,e`：把工作目录切到当前文件所在目录，聚焦 Neo-tree，并输出当前目录
@@ -475,7 +489,7 @@ Diffview 提交历史面板中可用：
 - `<Leader>,hr`：从 hex 视图切回二进制
 - `<Leader>,ho`：以二进制方式重新打开文件
 
-### Terminal and Build
+### Terminal and Build (xtools.lua / mf-runner.nvim / xmake.nvim / toggleterm.nvim)
 
 - `<M-/>`：打开或关闭系统 shell 终端，右侧半屏
 - `<M-O>`：在 Windows Terminal 当前窗口开 split pane 运行 opencode2（Windows / WSL）；后台服务端口被其他环境的实例占用时自动改用 `--standalone` 启动
@@ -483,7 +497,7 @@ Diffview 提交历史面板中可用：
 - `<Leader>xf`：打开 `mf-runner`
 - `<Leader>xx`：编辑 `mf-runner` 的 Makefile
 
-Xmake：
+Xmake（xmake.nvim）：
 
 - `<Leader>xb`：快速构建
 - `<Leader>xr`：快速运行
@@ -499,13 +513,12 @@ Xmake：
 终端窗口中可用：
 
 - `Esc` 或 `jk`：退出终端输入模式
-- `<M-/>`：终端内同样可以 toggle shell 终端
 - `<M-w>`：打开普通 buffer 列表
 - Terminal normal 模式下 `<C-z>`：当前窗口全屏或恢复原大小
 - `<M-q>`：关闭当前终端窗口或当前 tab
 - 注：终端模式下 `<C-l>`（清屏）已禁用
 
-### Editing and Selection
+### Editing and Selection (nvim-surround.nvim / nvim-treesitter-textobjects.nvim / multicursor.nvim / flash.nvim / wildfire.nvim / tshjkl.nvim / treesj.nvim / jieba.nvim)
 
 插入模式：
 
@@ -523,17 +536,17 @@ Visual 模式下 `<S-方向键>` / `<C-S-Left>` / `<C-S-Right>` / `<S-PageUp>` /
 
 SSH 到无图形环境的 Linux 服务器时：复制自动回传到本地剪贴板；粘贴本地内容需在插入模式下用终端的粘贴快捷键（如 Windows Terminal 的 `Ctrl+Shift+V`），`p` / `<C-v>` 只能粘贴本会话内复制的内容。
 
-语法节点选择：
+语法节点选择（wildfire.nvim / tshjkl.nvim）：
 
 - `<CR>`：启动或逐层扩展语法节点选择，Visual 模式下 `<BS>` 收缩（wildfire）
 - `<Leader>vv`：切换 tshjkl 语法树选择模式
 - `<Leader>vV`：切换 tshjkl 语法树选择模式（含外层节点）
 
-结构编辑：
+结构编辑（treesj.nvim）：
 
 - `<Leader>j`：把当前参数列表、对象或数组展开成多行，或再合并回一行
 
-包围符：
+包围符（nvim-surround.nvim）：
 
 - `ys`：添加包围符
 - `yss`：给当前行添加包围符
@@ -544,13 +557,13 @@ SSH 到无图形环境的 Linux 服务器时：复制自动回传到本地剪贴
 - `cs`：替换包围符
 - `cS`：替换包围符并换行
 
-中文分词移动（jieba.vim）：
+中文分词移动（jieba.nvim）：
 
 - `w` / `e` / `b` / `ge`：按 jieba 分词粒度在中文中移动
 - `iw` / `aw`：按分词选择中文词（`ysiw` 等 surround 操作也按分词生效）
 - `W` / `E` / `B` / `gE`：保持原生语义，连续中文视为一个整体（`E` 直达整段中文末尾）
 
-Treesitter 文本对象：
+Treesitter 文本对象（nvim-treesitter-textobjects.nvim）：
 
 - `ak` / `ik`：选择 block 外层或内层
 - `af` / `if`：选择 function 外层或内层
@@ -563,13 +576,13 @@ Treesitter 文本对象：
 - `an` / `in`：选择赋值外层或内层
 - `ah` / `ih`：选择数字
 
-Treesitter 文本对象交换：
+Treesitter 文本对象交换（nvim-treesitter-textobjects.nvim）：
 
 - `>K` / `<K`：和下一个或上一个 block 交换
 - `>F` / `<F`：和下一个或上一个 function 交换
 - `>A` / `<A`：和下一个或上一个参数交换
 
-多光标：
+多光标（multicursor.nvim）：
 
 - `<Leader>A`：对齐多光标列
 - `<M-c>`：切换多光标
@@ -584,7 +597,7 @@ Treesitter 文本对象交换：
 - 多光标模式中，`<Left>` / `<Right>`：切换主光标
 - 多光标模式中，`Esc`：退出多光标模式
 
-高亮：
+单词高亮与跳转（vim-highlighter）：
 
 - `t<CR>`：只高亮当前行里的当前单词
 - `f<CR>`：高亮当前单词的所有出现位置
@@ -597,7 +610,7 @@ Treesitter 文本对象交换：
 - `<S-M-j>` / `<S-M-k>`：在当前高亮分组内切换下一个或上一个结果
 - `<S-M-h>` / `<S-M-l>`：跳到离光标最近的下一个或上一个高亮，不限分组
 
-### UI
+### UI (snacks.nvim / transparent.nvim / rainbow-delimiters.nvim / treesitter-context.nvim)
 
 - `<Leader>sz`：切换 Zen 模式
 - `<Leader>sx`：切换 dim 模式
@@ -610,7 +623,7 @@ Treesitter 文本对象交换：
 - `<Leader>L`：清除搜索高亮
 - 注：AstroNvim 默认的 `<Leader>q`（退出）和 `<Leader>h`（清除高亮）已禁用
 
-### Debugging
+### Debugging (nvim-dap.nvim)
 
 - `<Leader>de`：添加调试表达式
 - `<Leader>dE`：添加调试表达式
@@ -620,7 +633,7 @@ Treesitter 文本对象交换：
 
 下面这些功能依赖额外工具或属于扩展用途。
 
-### AI Chat
+### AI Chat (opencode.nvim)
 
 需要安装 `opencode`。插件 main 分支同时支持 OpenCode v1 与 v2（自动协议识别）。v1 与 v2 可共存：v1 是 `opencode` 命令，v2 是 `opencode2` 命令，两者会话存储互相独立；插件通过 `opencode_executable = "opencode2"` 连接 v2：
 
@@ -721,7 +734,7 @@ AI 各选择器内部可用：
 - 模型选择器：`<C-f>` 收藏
 - MCP 选择器：`<C-t>` 切换连接
 
-### Code Snippet Execution
+### Code Snippet Execution (xtools.lua)
 
 需要安装 `xt` / `xs`：
 
@@ -730,15 +743,15 @@ AI 各选择器内部可用：
 - `<Leader>,v`：执行并弹出结果窗口
 - `<Leader>,z`：把当前文件或选中内容当 Lua 执行
 
-### Markdown Preview
+### Markdown Preview (render-markdown.nvim)
 
 - `<C-M-m>`：预览当前 Markdown
 
-### Proxy
+### Proxy (astrocore.lua)
 
 - `<Leader>P`：切换代理
 
-当前配置会在以下两种状态之间切换：
+状态：
 
 - 开启：`http://127.0.0.1:1080`
 - 关闭：只保留 `NO_PROXY`

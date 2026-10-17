@@ -96,6 +96,7 @@ return {
     { "<Leader>sz", function() Snacks.zen() end, desc = "Toggle Zen Mode" },
     { "<Leader>.", function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
     { "<Leader>s.", function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
+    { "<Leader>bo", function() Snacks.bufdelete.other() end, desc = "Delete Other Buffers" },
   },
   init = function()
     vim.api.nvim_create_autocmd("User", {
