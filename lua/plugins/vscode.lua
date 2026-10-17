@@ -18,6 +18,7 @@ vim.tbl_map(function(plugin) enabled[plugin] = true end, {
   -- more known working
   "dial.nvim",
   "flash.nvim",
+  "flash-zh.nvim",
   "flit.nvim",
   "leap.nvim",
   "mini.ai",
