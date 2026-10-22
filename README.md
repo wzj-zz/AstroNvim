@@ -704,14 +704,14 @@ AI 输入与输出窗口中均可用的会话标签页（多 tab）键位：
 - `<M-1>` ~ `<M-4>`：直达第 1~4 个会话标签页
 - `<M-x>`：关闭当前会话标签页
 
-每个会话标签页绑定创建时所在的目录。按 `<M-w>` 打开 worktree 选择器，用于多 agent 并行改同一仓库时的文件隔离；列出当前仓库的所有 git worktree，以及没有 worktree 的分支（标注 `(no worktree)`）：
+按 `<C-g>` 打开 worktree 选择器（多 agent 并行改同一仓库时隔离文件），列出所有 git worktree 及无 worktree 的分支：
 
-- `<CR>`：在选中 worktree 打开会话标签页（已有会话则接回最近的）；选中无 worktree 的分支则先重建 worktree
+- `<CR>`：打开选中 worktree 的会话标签页（无 worktree 则先创建）
 - `<C-a>`：新建分支并创建 `<仓库>/.worktrees/<分支名>`
-- `<C-d>`：强制删除选中项（worktree 连同其分支，并关闭对应的会话标签页），无安全检查，未提交/未合并的工作会被丢弃；主 worktree（`git worktree list` 的第一条）不可删除
+- `<C-d>`：强制删除选中项及其分支和会话标签页（无安全检查；主 worktree 不可删）
 - `<C-r>`：刷新列表
 
-worktree 标签页锁定在对应目录：仓库内 `:cd` 不影响它，`:cd` 到其他仓库时跟随新项目。
+worktree 标签页锁定在对应目录。
 
 注意：AI 窗口中 `q` 和 `<Esc>` 均已禁用，不会关闭窗口；开关窗口请用 `<M-o>`。
 

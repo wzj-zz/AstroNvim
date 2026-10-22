@@ -169,7 +169,7 @@ local function register_worktree_picker_keymap()
   vim.api.nvim_create_autocmd("FileType", {
     pattern = { "opencode", "opencode_output" },
     callback = function(ev)
-      vim.keymap.set({ "n", "i" }, "<M-w>", function() require("opencode_worktree").pick() end, {
+      vim.keymap.set({ "n", "i" }, "<C-g>", function() require("opencode_worktree").pick() end, {
         buffer = ev.buf,
         desc = "Worktrees",
       })

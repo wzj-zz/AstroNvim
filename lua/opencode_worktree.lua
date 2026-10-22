@@ -1,5 +1,7 @@
 local M = {}
 
+local caller_win
+
 local function git(cmd, cwd, cb)
   vim.system(vim.list_extend({ "git" }, cmd), { cwd = cwd, text = true }, function(res)
     vim.schedule(function() cb(res.code == 0, res.stdout or "", res.stderr or "") end)
@@ -8,19 +10,6 @@ end
 
 local function sanitize_branch(name)
   return (name:gsub("%s+", "-"):gsub("[~^:%?*%[%]\\]", ""):gsub("^[-.]+", ""):gsub("[%.%-]+$", ""))
-end
-
-local function exclude_worktrees_dir(root)
-  local exclude = root .. "/.git/info/exclude"
-  local f = io.open(exclude, "r")
-  local content = f and f:read "*a" or ""
-  if f then f:close() end
-  if content:find(".worktrees/", 1, true) then return end
-  f = io.open(exclude, "a")
-  if f then
-    f:write "\n.worktrees/\n"
-    f:close()
-  end
 end
 
 local function norm(path) return vim.fs.normalize(path):lower() end
@@ -42,16 +31,20 @@ local function open_session_tab(worktree_path, branch)
     for _, tab in ipairs(session_tabs.list()) do
       if tab_directory(tab) == target then
         session_runtime.switch_session_tab(tab.id):await()
-        return vim.notify("Worktree session ready: " .. branch, vim.log.levels.INFO)
+        local state = require "opencode.state"
+        local win = state.windows and (state.windows.input_win or state.windows.output_win)
+        if win and vim.api.nvim_win_is_valid(win) then vim.api.nvim_set_current_win(win) end
+        return
       end
     end
     local ok, err = pcall(function()
       require("opencode.api").open_session({ directory = worktree_path, title = "wt:" .. branch }):await()
     end)
-    if ok then
-      vim.notify("Worktree session ready: " .. branch, vim.log.levels.INFO)
-    else
+    if not ok then
       vim.notify("Open worktree session failed: " .. vim.inspect(err), vim.log.levels.ERROR)
+      if caller_win and vim.api.nvim_win_is_valid(caller_win) then
+        vim.api.nvim_set_current_win(caller_win)
+      end
     end
   end)()
 end
@@ -61,7 +54,18 @@ function M.open_worktree(root, branch)
   if vim.uv.fs_stat(path .. "/.git") then return open_session_tab(path, branch) end
   if vim.uv.fs_stat(path) then vim.fn.delete(path, "rf") end
 
-  exclude_worktrees_dir(root)
+  local exclude = root .. "/.git/info/exclude"
+  local f = io.open(exclude, "r")
+  local content = f and f:read "*a" or ""
+  if f then f:close() end
+  if not content:find(".worktrees/", 1, true) then
+    f = io.open(exclude, "a")
+    if f then
+      f:write "\n.worktrees/\n"
+      f:close()
+    end
+  end
+
   vim.fn.mkdir(vim.fs.dirname(path), "p")
   git({ "show-ref", "--verify", "--quiet", "refs/heads/" .. branch }, root, function(exists)
     local cmd = exists and { "worktree", "add", path, branch } or { "worktree", "add", "-b", branch, path }
@@ -75,23 +79,6 @@ end
 local function git_sync(cmd, cwd)
   local res = vim.system(vim.list_extend({ "git" }, cmd), { cwd = cwd, text = true }):wait()
   return res.code == 0, res.stdout or ""
-end
-
-local function parse_worktrees(stdout)
-  local items = {}
-  local path, branch
-  for line in (stdout .. "\n"):gmatch "(.-)\n" do
-    local wt = line:match "^worktree (.+)$"
-    if wt then
-      path, branch = wt, nil
-    elseif line == "" and path then
-      table.insert(items, { path = path, branch = branch or "(detached)" })
-      path, branch = nil, nil
-    elseif path then
-      branch = line:match "^branch refs/heads/(.+)$" or branch
-    end
-  end
-  return items
 end
 
 local function close_tabs_for_dir(dir)
@@ -108,7 +95,7 @@ local function close_tabs_for_dir(dir)
             break
           end
         end
-        if fallback then pcall(function() session_runtime.switch_session_tab(fallback.id):await() end) end
+        if fallback then session_runtime.switch_session_tab(fallback.id) end
         tab.bound_directory = nil
       end
       session_runtime.close_session_tab(tab.id)
@@ -121,13 +108,14 @@ local function remove_worktree(root, path, branch, cb)
   git({ "worktree", "remove", "--force", path }, root, function(ok, _, stderr)
     if not ok then
       if stderr:find "is not a working tree" then
-        if vim.fn.delete(path, "rf") ~= 0 then
-          vim.notify("Failed to delete leftover directory: " .. path, vim.log.levels.ERROR)
+        vim.fn.delete(path, "rf")
+      else
+        local handle = vim.uv.fs_scandir(path)
+        local empty = handle and vim.uv.fs_scandir_next(handle) == nil
+        if not empty then
+          vim.notify("git worktree remove failed: " .. stderr, vim.log.levels.ERROR)
           return cb(false)
         end
-      else
-        vim.notify("git worktree remove failed: " .. stderr, vim.log.levels.ERROR)
-        return cb(false)
       end
     end
     if branch == "(detached)" then return cb(true) end
@@ -144,6 +132,7 @@ local function delete_branch(root, branch, picker)
 end
 
 function M.pick()
+  caller_win = vim.api.nvim_get_current_win()
   local base = require("opencode.state").current_cwd or vim.fn.getcwd()
   local ok, stdout = git_sync({ "rev-parse", "--path-format=absolute", "--git-common-dir" }, base)
   if not ok then return vim.notify("Not a git repository", vim.log.levels.ERROR) end
@@ -162,9 +151,18 @@ function M.pick()
       local wt_res, br_res = wt_proc:wait(), br_proc:wait()
       local items = {}
       local in_worktree = {}
-      for i, wt in ipairs(parse_worktrees(wt_res.stdout or "")) do
-        in_worktree[wt.branch] = true
-        table.insert(items, { text = wt.branch .. " " .. wt.path, path = wt.path, branch = wt.branch, is_main = i == 1 })
+      local path, branch
+      for line in ((wt_res.stdout or "") .. "\n"):gmatch "(.-)\n" do
+        local wt = line:match "^worktree (.+)$"
+        if wt then
+          path, branch = wt, nil
+        elseif line == "" and path then
+          in_worktree[branch or "(detached)"] = true
+          table.insert(items, { text = (branch or "(detached)") .. " " .. path, path = path, branch = branch or "(detached)", is_main = #items == 0 })
+          path, branch = nil, nil
+        elseif path then
+          branch = line:match "^branch refs/heads/(.+)$" or branch
+        end
       end
       if br_res.code == 0 then
         for _, b in ipairs(vim.split(vim.trim(br_res.stdout or ""), "\n", { trimempty = true })) do
