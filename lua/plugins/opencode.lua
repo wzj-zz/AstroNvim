@@ -1,21 +1,11 @@
--- Position "[i/n]" badge on the USER message block the cursor is in, on the
--- message's first *body* line (header lines get clobbered by markdown-rule
--- rendering). The total counts only *cached* user messages.
 local user_msg_badge_ns = vim.api.nvim_create_namespace("opencode_user_msg_badge")
 
--- Badge color: default-link to `Special`; override `OpencodeUserMsgBadge` to taste.
 local function set_user_msg_badge_hl()
   vim.api.nvim_set_hl(0, "OpencodeUserMsgBadge", { link = "Special", default = true })
 end
 set_user_msg_badge_hl()
 vim.api.nvim_create_autocmd("ColorScheme", { callback = set_user_msg_badge_hl })
 
----First body line (1-indexed) of a rendered message: the first content part's
----start line, falling back to the message's own header line. The message-level
----range covers only the separator/header; the body lives in part ranges.
----Part lookup must go through ctx.content_key: v2 text/reasoning parts have
----no `id` and are registered as "<message_id>:content:<index>".
----@return integer? # 1-indexed line, nil if the message isn't rendered
 local function message_body_line(ctx, m)
   local r = ctx.render_state:get_message(m.id)
   if not r or not r.line_start then return nil end
@@ -34,8 +24,6 @@ local function update_user_msg_badge(win)
   if not buf or not vim.api.nvim_buf_is_valid(buf) then return end
   local ctx = require("opencode.ui.renderer.ctx").current()
 
-  -- The current block owner is the last message (any kind) whose header is
-  -- at/above the cursor; show the badge only when that owner is a USER message.
   local line = vim.api.nvim_win_get_cursor(win)[1]
   local total, owner_index, owner = 0, nil, nil
   for _, m in ipairs(ctx.entries) do
@@ -57,16 +45,6 @@ local function update_user_msg_badge(win)
   end
 end
 
----Expand unrendered history above the cursor (for `prev`-direction jumps).
----Lazy render shows only a tail window, so older entries may be unrendered.
----Expansion only prepends older messages, so it can only help jumping up.
----Guarded against re-expanding when everything cached is already rendered:
----a full re-render per extra press at the true top churns the buffer and lets
----scheduled follow-up work (markdown re-render, history pulls) move the
----cursor, which then eats the next few jump presses.
----@param ctx table render context
----@param current_line0 integer 0-indexed cursor line
----@return integer? base0 # 0-indexed line to re-search from, nil when nothing expanded
 local function expand_unrendered_above(ctx, current_line0)
   local first = ctx.entries[1]
   local first_rendered = first and ctx.render_state:get_message(first.id)
@@ -76,7 +54,6 @@ local function expand_unrendered_above(ctx, current_line0)
     and not (first_rendered and first_rendered.line_start)
   if not has_unrendered_above then return nil end
 
-  -- Remember the block under the cursor; expansion prepends lines.
   local anchor_id
   for _, m in ipairs(ctx.entries) do
     local r = ctx.render_state:get_message(m.id)
@@ -91,8 +68,6 @@ local function expand_unrendered_above(ctx, current_line0)
   return (r and r.line_start) or 0
 end
 
--- Jump between file-change blocks (edit / apply_patch / patch; `write` has no
--- diff action) via the render state's registered actions, not text search.
 local function goto_file_change(forward)
   local state = require("opencode.state")
   require("opencode.ui.ui").focus_output()
@@ -124,12 +99,9 @@ local function goto_file_change(forward)
     pcall(vim.api.nvim_win_call, win, function() vim.cmd([[noau normal! m']]) end)
     vim.api.nvim_win_set_cursor(win, { target + 1, 0 })
   end
-  -- At the boundary: stay put silently (no notification).
   update_user_msg_badge(win)
 end
 
--- OSC 9;4 progress indicator on the terminal tab: spinner while busy, paused
--- at 50% on pending permission, cleared when done. Written to Neovim's stdout.
 local term_progress = (function()
   local osc = {
     busy = "\027]9;4;3;0\007",
@@ -180,20 +152,43 @@ local term_progress = (function()
   }
 end)()
 
+local function hook_submit_progress()
+  local ok, v2_operations = pcall(require, "opencode.protocols.v2.operations")
+  if not ok or type(v2_operations.submit) ~= "function" then
+    vim.notify("opencode: cannot hook submit for progress (plugin internals changed)", vim.log.levels.WARN)
+    return
+  end
+  local submit = v2_operations.submit
+  v2_operations.submit = function(connection, session_id, ...)
+    term_progress.on_submit(session_id)
+    return submit(connection, session_id, ...)
+  end
+end
+
+local function register_worktree_picker_keymap()
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "opencode", "opencode_output" },
+    callback = function(ev)
+      vim.keymap.set({ "n", "i" }, "<M-w>", function() require("opencode_worktree").pick() end, {
+        buffer = ev.buf,
+        desc = "Worktrees",
+      })
+    end,
+  })
+end
+
+local function track_footer_cwd()
+  require("opencode.state").store.subscribe("current_cwd", function()
+    pcall(function() require("opencode.ui.footer").render() end)
+  end)
+end
+
 vim.api.nvim_create_autocmd("VimLeavePre", { callback = term_progress.clear })
 
--- Footer label "repo:branch" for the session's cwd, used by
--- hooks.on_footer_render in opts below (upstream:
--- https://github.com/sudo-tee/opencode.nvim/pull/514, issue #512; older
--- plugin versions silently ignore the hook). Resolved async, cached per
--- directory. --git-common-dir resolves to the MAIN repo's .git even from a
--- linked worktree, so the label shows "mainrepo:branch".
 local cwd_label_cache = {}
 local function cwd_label(cwd)
   if cwd_label_cache[cwd] then return cwd_label_cache[cwd] end
   local fallback = vim.fn.fnamemodify(cwd, ":~")
-  -- pcall: vim.system raises when cwd no longer exists (e.g. worktree
-  -- deleted while a tab still points at it).
   local spawned = pcall(vim.system, {
     "git", "rev-parse", "--path-format=absolute", "--git-common-dir", "--abbrev-ref", "HEAD",
   }, { cwd = cwd, text = true }, function(res)
@@ -217,18 +212,11 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "opencode", "opencode_output" },
   callback = function(event)
-    -- AstroNvim maps `q` to close for nofile buffers on BufWinEnter; pre-empt it
-    -- with a <Nop> so `q` stays inert in opencode windows (like the disabled <Esc>).
     vim.keymap.set("n", "q", "<Nop>", { buffer = event.buf })
-    -- <M-f>: toggle current-file context (= "Current File" in the `#` picker; config default on).
     vim.keymap.set({ "n", "i" }, "<M-f>", function()
       require("opencode.context").toggle_context("current_file")
     end, { buffer = event.buf, desc = "Toggle current file context" })
     if event.match ~= "opencode_output" then return end
-    -- Registered here instead of the plugin's output_window keymap table:
-    -- the plugin re-processes function-valued window keymaps on every
-    -- windows-store update with preserve_existing, and once the mapping
-    -- exists it spams "No action found for keymap" warnings (plugin bug).
     vim.keymap.set("n", "<M-N>", function() goto_file_change(true) end, {
       buffer = event.buf,
       desc = "Next file change",
@@ -237,8 +225,6 @@ vim.api.nvim_create_autocmd("FileType", {
       buffer = event.buf,
       desc = "Prev file change",
     })
-    -- Recompute the [i/n] badge on CursorMoved: survives Neovim firing
-    -- CursorMoved after the jump keymap returns, which would wipe the badge.
     vim.api.nvim_create_autocmd("CursorMoved", {
       buffer = event.buf,
       callback = function()
@@ -288,9 +274,6 @@ return {
       preferred_completion = "blink",
       default_mode = "build",
       opencode_executable = "opencode2",
-      -- Repo-wide session lock: bound worktree tabs stay pinned across :cd
-      -- inside the same repo (main checkout <-> worktrees), and unpin when
-      -- leaving it. Requires https://github.com/sudo-tee/opencode.nvim/pull/517.
       lock_session_to_directory = function(change)
         local function common_dir(dir)
           local ok, res = pcall(function()
@@ -392,15 +375,12 @@ return {
           ["<M-p>"] = { "prev_user_message", mode = "n", desc = "Prev user message" },
         },
         session_diff = {
-          -- <M-q>: close the whole diff view from any scope (`q` in floats only closes the float).
           list = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
-            -- Mirror codediff's <M-e>; count clamps when only one diff pane exists.
             ["<M-e>"] = { function() vim.cmd "2wincmd l" end, desc = "Focus diff pane" },
           },
           preview = {
             ["<M-q>"] = { "close", desc = "Close diff view" },
-            -- Mirror codediff's <Leader>e explorer focus; count clamps to the leftmost window.
             ["<Leader>e"] = { function() vim.cmd "99wincmd h" end, desc = "Focus file list" },
           },
           messages = {
@@ -511,12 +491,9 @@ return {
         default_agent = nil,
         instructions = nil,
       },
-      -- Terminal tab progress (term_progress above)
       hooks = {
         on_done_thinking = function(session) term_progress.on_done(session) end,
         on_permission_requested = function(session) term_progress.on_permission(session) end,
-        -- "repo:branch" label on the footer's left; the renderer counts it in
-        -- the normal padding, so the right side (model/mode) is never clipped.
         on_footer_render = function(segments)
           local cwd = require("opencode.state").current_cwd
           if cwd then table.insert(segments, 1, { cwd_label(cwd):sub(1, 30) .. " ", "OpencodeHint" }) end
@@ -539,34 +516,9 @@ return {
     },
     config = function(_, opts)
       require("opencode").setup(opts)
-
-      -- Terminal tab progress (term_progress above): mark the session busy on
-      -- submit.
-      local v2_operations = require("opencode.protocols.v2.operations")
-      local submit_with_progress = v2_operations.submit
-      v2_operations.submit = function(connection, session_id, ...)
-        term_progress.on_submit(session_id)
-        return submit_with_progress(connection, session_id, ...)
-      end
-
-      -- Worktree picker on <M-w> inside opencode input/output windows (backend:
-      -- lua/opencode_worktree.lua). Buffer-local via FileType so it doesn't clash
-      -- with the global <M-w> Find Buffer mapping in lua/plugins/snacks.lua.
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "opencode", "opencode_output" },
-        callback = function(ev)
-          vim.keymap.set({ "n", "i" }, "<M-w>", function() require("opencode_worktree").pick() end, {
-            buffer = ev.buf,
-            desc = "Worktrees",
-          })
-        end,
-      })
-
-      -- Re-render the footer when the session's cwd changes so the label
-      -- tracks session/tab switches.
-      require("opencode.state").store.subscribe("current_cwd", function()
-        pcall(function() require("opencode.ui.footer").render() end)
-      end)
+      hook_submit_progress()
+      register_worktree_picker_keymap()
+      track_footer_cwd()
 
       local ok, wk = pcall(require, "which-key")
       if ok then wk.add {
