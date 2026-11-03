@@ -436,7 +436,7 @@ Diffview 提交历史面板中可用：
 ### Bookmarks (xmark.nvim)
 
 - `<Leader>mm`：添加或更新当前书签
-- `<Leader>mt`：切换当前书签状态
+- `<Leader>mt` / `<M-S-m>`：切换当前书签状态
 - `<Leader>md`：删除当前书签
 - `<Leader>mc`：编辑当前书签说明
 - `<Leader>mg`：跳到当前书签列表记录的当前书签
@@ -452,7 +452,7 @@ Diffview 提交历史面板中可用：
 - `<Leader>ml`：切换书签列表
 - `<Leader>ma`：新建书签列表
 - `<Leader>mr`：重命名当前书签列表
-- `<Leader>me`：编辑当前书签列表顺序
+- `<Leader>me` / `<M-m>`：编辑当前书签列表顺序
 - `<M-?>`：跳到当前书签列表记录的当前书签
 - `<M-{>`：跳到上一个书签
 - `<M-}>`：跳到下一个书签
