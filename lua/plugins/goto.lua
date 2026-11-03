@@ -65,13 +65,17 @@ local function search_operator(forward, select_child)
   end
 end
 
-vim.keymap.set({ "n", "v" }, "<M->>", function()
-  search_operator(true, 1)
-end, { desc = "Find next operator and select second operand" })
+for _, lhs in ipairs { "<M-S-.>", "<M-S->>", "<M->>" } do
+  vim.keymap.set({ "n", "v" }, lhs, function()
+    search_operator(true, 1)
+  end, { desc = "Find next operator and select second operand" })
+end
 
-vim.keymap.set({ "n", "v" }, "<M-<>", function()
-  search_operator(false, 0)
-end, { desc = "Find previous operator and select first operand" })
+for _, lhs in ipairs { "<M-S-,>", "<M-S-<>", "<M-<>" } do
+  vim.keymap.set({ "n", "v" }, lhs, function()
+    search_operator(false, 0)
+  end, { desc = "Find previous operator and select first operand" })
+end
 
 return {
   "AstroNvim/astrocore",

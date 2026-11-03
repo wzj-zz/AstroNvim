@@ -2,6 +2,30 @@ if vim.g.vscode then return {} end
 
 local xtools = require "xtools"
 
+local function qf_first()
+  if #vim.fn.getqflist() > 0 then
+    vim.cmd "cfirst"
+    vim.cmd "norm! zz"
+  end
+end
+
+local function qf_last()
+  if #vim.fn.getqflist() > 0 then
+    vim.cmd "clast"
+    vim.cmd "norm! zz"
+  end
+end
+
+local function qf_nearest()
+  if #vim.fn.getqflist() > 0 then
+    xtools.goto_nearest_qf_item()
+    vim.cmd "cc"
+    vim.cmd "norm! zz"
+  end
+end
+
+local function qf_filter_current_buffer() xtools.filter_qflist_current_buffer() end
+
 return {
   "kevinhwang91/nvim-bqf",
   ft = "qf",
@@ -61,24 +85,12 @@ return {
               end,
               desc = "Next quickfix item",
             },
-            ["<M-(>"] = {
-              function()
-                if #vim.fn.getqflist() > 0 then
-                  vim.cmd "cfirst"
-                  vim.cmd "norm! zz"
-                end
-              end,
-              desc = "First quickfix item",
-            },
-            ["<M-)>"] = {
-              function()
-                if #vim.fn.getqflist() > 0 then
-                  vim.cmd "clast"
-                  vim.cmd "norm! zz"
-                end
-              end,
-              desc = "Last quickfix item",
-            },
+            ["<M-S-9>"] = { qf_first, desc = "First quickfix item" },
+            ["<M-S-(>"] = { qf_first, desc = "First quickfix item" },
+            ["<M-(>"] = { qf_first, desc = "First quickfix item" },
+            ["<M-S-0>"] = { qf_last, desc = "Last quickfix item" },
+            ["<M-S-)>"] = { qf_last, desc = "Last quickfix item" },
+            ["<M-)>"] = { qf_last, desc = "Last quickfix item" },
             ["<M-8>"] = {
               function()
                 if #vim.fn.getqflist() > 0 then
@@ -88,24 +100,16 @@ return {
               end,
               desc = "Current quickfix item",
             },
-            ["<M-*>"] = {
-              function()
-                if #vim.fn.getqflist() > 0 then
-                  xtools.goto_nearest_qf_item()
-                  vim.cmd "cc"
-                  vim.cmd "norm! zz"
-                end
-              end,
-              desc = "Nearest quickfix item",
-            },
+            ["<M-S-8>"] = { qf_nearest, desc = "Nearest quickfix item" },
+            ["<M-S-*>"] = { qf_nearest, desc = "Nearest quickfix item" },
+            ["<M-*>"] = { qf_nearest, desc = "Nearest quickfix item" },
             ["<M-7>"] = {
               function() xtools.sort_qf() end,
               desc = "Sort qflist",
             },
-            ["<M-&>"] = {
-              function() xtools.filter_qflist_current_buffer() end,
-              desc = "Filter qflist in current buffer",
-            },
+            ["<M-S-7>"] = { qf_filter_current_buffer, desc = "Filter qflist in current buffer" },
+            ["<M-S-&>"] = { qf_filter_current_buffer, desc = "Filter qflist in current buffer" },
+            ["<M-&>"] = { qf_filter_current_buffer, desc = "Filter qflist in current buffer" },
             ["<Leader>so"] = {
               function()
                 local pattern = vim.fn.input "Search qflist content"
