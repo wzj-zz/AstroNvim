@@ -29,7 +29,6 @@
   - [Quickfix](#quickfix)
   - [Search and Replace](#search-and-replace)
   - [Git](#git)
-  - [Harpoon](#harpoon)
   - [Sessions](#sessions)
   - [Bookmarks](#bookmarks)
   - [Quick Actions](#quick-actions)
@@ -299,6 +298,7 @@ Ubuntu 下安装后命令名通常是 `fdfind`。如果本机没有 `fd` 命令�
 - `<M-w>`：打开 buffer 列表
 - `<S-M-i>`：下一个 buffer
 - `<S-M-u>`：上一个 buffer
+- `<Leader>1` 到 `<Leader>5`：跳到第 1 到第 5 个 buffer
 - `<Leader>bv`：恢复当前文件内容
 - `<Leader>bx`：关闭其他 buffer 和窗口
 - `<Leader>bo`：关闭其他所有 buffer（保留当前，窗口布局不变）
@@ -425,12 +425,6 @@ Diffview 提交历史面板中可用：
 - `y`：复制该条目的 commit hash
 - `L`：查看提交详情
 - `X`：恢复文件到该提交的状态
-
-### Harpoon (harpoon.nvim)
-
-- `<S-M-m>`：把当前文件加入 Harpoon
-- `<M-m>`：打开 Harpoon 列表
-- `<Leader>1` 到 `<Leader>5`：跳到第 1 到第 5 个 Harpoon 文件
 
 ### Sessions (resession.nvim)
 
@@ -816,14 +810,9 @@ Git：
 - `<Leader>,3`：复制当前文件完整路径
 - `<Leader>,s`：切换 VS Code 终端
 
-Harpoon：
+Buffer：
 
-- `<M-m>`：打开 Harpoon 列表
-- `<M-M>`：添加当前编辑器到 Harpoon
-- `<Leader>1`：跳到 Harpoon 1
-- `<Leader>2`：跳到 Harpoon 2
-- `<Leader>3`：跳到 Harpoon 3
-- `<Leader>4`：跳到 Harpoon 4
+- `<Leader>1` 到 `<Leader>5`：跳到第 1 到第 5 个编辑器
 
 CodeQL：
 

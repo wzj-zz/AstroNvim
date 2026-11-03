@@ -176,6 +176,11 @@ return {
 
         ["<S-M-i>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
         ["<S-M-u>"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
+        ["<Leader>1"] = { function() require("astrocore.buffer").nav_to(1) end, desc = "goto buffer 1" },
+        ["<Leader>2"] = { function() require("astrocore.buffer").nav_to(2) end, desc = "goto buffer 2" },
+        ["<Leader>3"] = { function() require("astrocore.buffer").nav_to(3) end, desc = "goto buffer 3" },
+        ["<Leader>4"] = { function() require("astrocore.buffer").nav_to(4) end, desc = "goto buffer 4" },
+        ["<Leader>5"] = { function() require("astrocore.buffer").nav_to(5) end, desc = "goto buffer 5" },
 
         ["<Leader>lt"] = { "<cmd>InspectTree<cr>", desc = "Show AST" },
 

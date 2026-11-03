@@ -129,13 +129,12 @@ return {
       maps.n["<Leader>,3"] = function() require("vscode").action "copyFilePath" end
       maps.n["<Leader>,s"] = function() require("vscode").action "workbench.action.terminal.toggleTerminal" end
 
-      -- vscode-harpoon Mappings
-      maps.n["<M-m>"] = function() require("vscode").action "vscode-harpoon.editEditors" end
-      maps.n["<M-M>"] = function() require("vscode").action "vscode-harpoon.addEditor" end
-      maps.n["<Leader>1"] = function() require("vscode").action "vscode-harpoon.gotoEditor1" end
-      maps.n["<Leader>2"] = function() require("vscode").action "vscode-harpoon.gotoEditor2" end
-      maps.n["<Leader>3"] = function() require("vscode").action "vscode-harpoon.gotoEditor3" end
-      maps.n["<Leader>4"] = function() require("vscode").action "vscode-harpoon.gotoEditor4" end
+      -- Buffer Mappings
+      maps.n["<Leader>1"] = function() require("vscode").action "workbench.action.openEditorAtIndex1" end
+      maps.n["<Leader>2"] = function() require("vscode").action "workbench.action.openEditorAtIndex2" end
+      maps.n["<Leader>3"] = function() require("vscode").action "workbench.action.openEditorAtIndex3" end
+      maps.n["<Leader>4"] = function() require("vscode").action "workbench.action.openEditorAtIndex4" end
+      maps.n["<Leader>5"] = function() require("vscode").action "workbench.action.openEditorAtIndex5" end
 
       -- CodeQL Mappings
       maps.n["<Leader>qh"] = function() require("vscode").action "codeQLQueryHistory.focus" end
